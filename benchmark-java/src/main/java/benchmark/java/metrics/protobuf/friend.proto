@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package benchmark.java.metrics.protobuf;
+
+
+message Friend {
+  int32 id = 1;
+  string name = 2;
+}

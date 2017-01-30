@@ -1,0 +1,11 @@
+benchmark-php/vendor/*
+benchmark-php/temp/*
+benchmark-php/output/*
+benchmark-php/config/test_data_huge.json
+
+benchmark-java/output/*
+benchmark-java/target
+benchmark-java/nb-configuration.xml
+benchmark-java/nbactions.xml
+
+.idea

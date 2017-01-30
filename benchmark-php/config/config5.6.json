@@ -1,0 +1,101 @@
+{
+	"native": [
+		{
+			"name": "PHP serialize",
+			"class": "\\Benchmark\\Metrics\\Native\\PhpUnSerializeFunction",
+			"url": "http://php.net/manual/en/function.serialize.php"
+		}
+	],
+	"json": [
+		{
+			"name": "PHP native json",
+			"class": "\\Benchmark\\Metrics\\Json\\PhpJsonFunction",
+			"url": "http://php.net/manual/en/function.json-encode.php"
+		},
+		{
+			"name": "webmozart/json",
+			"class": "\\Benchmark\\Metrics\\Json\\WebmozartJson",
+			"url": "https://github.com/webmozart/json",
+			"version": "1.2.2"
+		},
+		{
+			"name": "seld/jsonlint",
+			"class": "\\Benchmark\\Metrics\\Json\\SeldJsonlint",
+			"url": "https://github.com/Seldaek/jsonlint/blob/master/composer.json",
+			"version": "1.5"
+		},
+		{
+			"name": "salsify/json-streaming-parser",
+			"class": "\\Benchmark\\Metrics\\Json\\SalsifyJsonStreamingParser",
+			"url": "https://github.com/salsify/jsonstreamingparser",
+			"version": "6.0.1"
+		},
+		{
+			"name": "bukka/php-jsond",
+			"class": "\\Benchmark\\Metrics\\Json\\BukkaPhpJsond",
+			"url": "https://github.com/salsify/BukkaPhpJsond",
+			"version": "1.3.0"
+		}
+	],
+	"xml": [
+		{
+			"name": "openlss/lib-array2xml",
+			"class": "\\Benchmark\\Metrics\\Xml\\OpenlssLibArray2Xml",
+			"url": "https://github.com/nullivex/lib-array2xml",
+			"version": "0.5.0"
+		},
+		{
+			"name": "spatie/array-to-xml",
+			"class": "\\Benchmark\\Metrics\\Xml\\SpatieArrayToXml",
+			"url": "https://github.com/spatie/array-to-xml",
+			"version": "2.2.0"
+		},
+		{
+			"name": "fillup/array2xml",
+			"class": "\\Benchmark\\Metrics\\Xml\\FillupArray2Xml",
+			"url": "https://github.com/fillup/array2xml",
+			"version": "0.5.1"
+		},
+		{
+			"name": "traeger/SimplestXML",
+			"class": "\\Benchmark\\Metrics\\Xml\\TraegerSimplestXML",
+			"url": "https://github.com/traeger/SimplestXML",
+			"version": "r1"
+		}
+	],
+	"protobuf": [
+		{
+			"name": "google/protobuf",
+			"class": "\\Benchmark\\Metrics\\Protobuf\\GoogleProtobuf",
+			"url": "https://github.com/google/protobuf",
+			"version": "3.1.0"
+		}
+	],
+	"msgpack": [
+		{
+			"name": "msgpack/msgpack-php",
+			"class": "\\Benchmark\\Metrics\\Msgpack\\MsgpackOfficial",
+			"url": "https://github.com/msgpack/msgpack-php",
+			"version": "2.0.1"
+		},
+		{
+			"name": "rybakit/msgpack",
+			"class": "\\Benchmark\\Metrics\\Msgpack\\RybakitMsgpack",
+			"url": "https://github.com/rybakit/msgpack.php",
+			"version": "0.2.1"
+		},
+		{
+			"name": "onlinecity/msgpack-php",
+			"class": "\\Benchmark\\Metrics\\Msgpack\\OnlinecityMsgpack",
+			"url": "https://github.com/onlinecity/msgpack-php"
+		}
+	],
+	"avro": [
+		{
+			"name": "apache/avro",
+			"class": "\\Benchmark\\Metrics\\Avro\\AvroOfficial",
+			"url": "http://avro.apache.org/",
+			"version": "1.8.1"
+		}
+	]
+}

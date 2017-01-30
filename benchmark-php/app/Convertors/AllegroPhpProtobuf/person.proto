@@ -1,0 +1,29 @@
+import "friend.proto";
+
+package Benchmark.Converters.AllegroPhpProtobuf;
+
+
+message Person {
+  required string _id = 1;
+  required int32 index = 2;
+  required string guid = 3;
+  required bool isActive = 4;
+  required string balance = 5;
+  required string picture = 6;
+  required int32 age = 7;
+  required string eyeColor = 8;
+  required string name = 9;
+  required string gender = 10;
+  required string company = 11;
+  required string email = 12;
+  required string phone = 13;
+  required string address = 14;
+  required string about = 15;
+  required string registered = 16;
+  required float latitude = 17;
+  required float longitude = 18;
+  repeated string tags = 19;
+  repeated Friend friends = 20;
+  required string greeting = 21;
+  required string favoriteFruit = 22;
+}

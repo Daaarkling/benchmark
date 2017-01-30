@@ -1,0 +1,25 @@
+{
+    "name": "darkling/benchmark-php",
+    "description": "Comparison of data serialization formats in PHP",
+    "authors": [
+        {
+            "name": "Jan Vanura",
+            "email": "jano.vano@gmail.com"
+        }
+    ],
+    "require": {
+        "nette/robot-loader": "^v2.4",
+        "nette/utils": "^v2.4",
+        "symfony/console": "^3.1",
+        "league/csv": "^8.1",
+        "justinrainbow/json-schema": "4.0.1 as 1.6.1",
+        "openlss/lib-array2xml": "0.5.0",
+        "spatie/array-to-xml": "2.2",
+        "fillup/array2xml": "0.5.1",
+        "rybakit/msgpack": "0.2.1",
+        "webmozart/json": "1.2",
+        "google/protobuf": "v3.1.0-alpha-1",
+        "seld/jsonlint": "1.5",
+        "salsify/json-streaming-parser": "6.0"
+    }
+}

@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package Benchmark.Converters.GoogleProtobuf;
+
+
+message Friend {
+  int32 id = 1;
+  string name = 2;
+}

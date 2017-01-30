@@ -1,0 +1,8 @@
+import "person.proto";
+
+package Benchmark.Converters.AllegroPhpProtobuf;
+
+
+message PersonCollection {
+  repeated Person persons = 1;
+}

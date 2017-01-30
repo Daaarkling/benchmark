@@ -1,0 +1,7 @@
+package Benchmark.Converters.AllegroPhpProtobuf;
+
+
+message Friend {
+  required int32 id = 1;
+  required string name = 2;
+}
