@@ -1,0 +1,17 @@
+{
+  "name": "benchmark-nodejs",
+  "version": "0.0.1",
+  "description": "Comparison of data serialization formats in NodeJS",
+  "license": "BSD-3-Clause",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Daaarkling/benchmark.git"
+  },
+  "dependencies": {
+    "commander": "^2.9.0",
+    "glob": "^7.1.1",
+    "msgpack": "1.0.2",
+    "msgpack-js": "0.3.0",
+    "msgpack5": "3.4.1"
+  }
+}
