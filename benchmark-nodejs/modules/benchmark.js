@@ -1,33 +1,32 @@
-var glob = require("glob"),
-  	path = require("path");
+var glob = require("glob");
+var path = require("path");
+var outputs = require("./outputs");
 
 
 exports.run = function(config) {
 	
 	// find all libs
 	var metrics = [];
-	glob.sync("./modules/metrics/**/!(*metric).js").forEach(function(file) {
+	glob.sync(__dirname + "/metrics/**/!(*metric).js").forEach((file) => {
 		metrics.push(require(path.resolve(file)));
 	});
-	
+
 
 	// filter by type if given
 	if(config.format) {
-		metrics = metrics.filter(function(item) {
-			return item.metric.format === config.format;
+		metrics = metrics.filter((metric) => {
+			return metric.format === config.format;
 		});
 	}
-	
 
+	
 	// run benchmarks
 	result = [];
-	metrics.forEach(function(item) {
-		result.push(item.metric.run(config.testdata, config.repetitions));
+	metrics.forEach((metric) => {
+		result.push(metric.run(config.testData, config.repetitions));
 	});
 	
 	
-	console.log(result);
-	
+	// hande output (run function by its string name)
+	outputs[config.output](result, config.outDir);
 }
-
-

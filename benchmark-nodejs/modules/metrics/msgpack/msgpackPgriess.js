@@ -1,8 +1,8 @@
-var metric = require('../metric'); 
+var Metric = require('../metric'); 
 var lib = require('msgpack');
 
 
-exports.metric = new metric.Metric(
+module.exports = new Metric(
 		"msgpack",
 		"pgriess/node-msgpack", 
 		"1.0.2", 

@@ -1,8 +1,8 @@
-var metric = require('../metric'); 
+var Metric = require('../metric'); 
 var lib = require('msgpack-js');
 
 
-exports.metric = new metric.Metric(
+module.exports = new Metric(
 		"msgpack",
 		"creationix/msgpack-js", 
 		"0.3.0", 

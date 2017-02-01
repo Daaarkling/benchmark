@@ -1,9 +1,9 @@
-var metric = require('../metric'); 
+var Metric = require('../metric'); 
 
 
-exports.metric = new metric.Metric(
+module.exports = new Metric(
 		"json",
-		"JSON", 
+		"stringify(), parse()", 
 		null, 
 		null, 
 		JSON.stringify, 

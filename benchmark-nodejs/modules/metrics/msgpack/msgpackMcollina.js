@@ -1,8 +1,8 @@
-var benchmark = require('../metric'); 
+var Metric = require('../metric'); 
 var lib = require('msgpack5')();
 
 
-exports.metric = new benchmark.Metric(
+module.exports = new Metric(
 		"msgpack",
 		"mcollina/msgpack5", 
 		"3.4.1", 
