@@ -44,7 +44,7 @@ class AvroOfficial implements IMetric
 
 	public function serialize($data)
 	{
-		$schema = file_get_contents(__DIR__ . '/../../Convertors/Avro/avro_schema.json');
+		$schema = file_get_contents(__DIR__ . '/../../Converters/Avro/avro_schema.json');
 		$writerSchema = \AvroSchema::parse($schema);
 		$writer = new \AvroIODatumWriter($writerSchema);
 		$io = new AvroStringIO();
