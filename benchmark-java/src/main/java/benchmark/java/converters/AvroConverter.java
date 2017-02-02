@@ -7,18 +7,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import benchmark.java.metrics.protobuf.FriendOuterClass;
-import benchmark.java.metrics.protobuf.PersonCollectionOuterClass;
-import benchmark.java.metrics.protobuf.PersonOuterClass;
+import benchmark.java.metrics.avro.EyeColor;
+import benchmark.java.metrics.avro.Friend;
+import benchmark.java.metrics.avro.Fruit;
+import benchmark.java.metrics.avro.Gender;
+import benchmark.java.metrics.avro.Person;
+import benchmark.java.metrics.avro.PersonCollection;
 import benchmark.java.utils.JsonLoader;
 
 
-public class ProtobufConvertor implements IDataConvertor {
+public class AvroConverter implements IDataConverter {
 	
 	/**
 	 * 
 	 * @param testDataFile
-	 * @return PersonCollectionOuterClass object
+	 * @return PersonCollection Avro object
 	 */
 	@Override
 	public Object convertData(File testDataFile) {
@@ -26,28 +29,28 @@ public class ProtobufConvertor implements IDataConvertor {
 		try {
 			JsonNode testData = JsonLoader.loadResource(testDataFile);
 			
-			List<PersonOuterClass.Person> persons = new ArrayList<>();
+			List<Person> persons = new ArrayList<>();
 			
 			for (JsonNode personNode : testData.path("persons")) {
 				persons.add(parsePerson(personNode));
 			}
 			
-			PersonCollectionOuterClass.PersonCollection personCollection = PersonCollectionOuterClass.PersonCollection.newBuilder()
-					.addAllPersons(persons)
+			PersonCollection personCollection = PersonCollection.newBuilder()
+					.setPersons(persons)
 					.build();
 			
 			return personCollection;
 			
 		} catch (IOException ex) {
-			Logger.getLogger(ProtobufConvertor.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(AvroConverter.class.getName()).log(Level.SEVERE, null, ex);
 			return null;
 		}
 		
 	}
 	
-	private PersonOuterClass.Person parsePerson(JsonNode personNode) {
+	private Person parsePerson(JsonNode personNode) {
 		
-		PersonOuterClass.Person person = PersonOuterClass.Person.newBuilder()
+		Person person = Person.newBuilder()
 				.setId(personNode.path("_id").asText())
 				.setIndex(personNode.path("index").asInt())
 				.setGuid(personNode.path("guid").asText())
@@ -66,8 +69,8 @@ public class ProtobufConvertor implements IDataConvertor {
 				.setRegistered(personNode.path("registered").asText())
 				.setLatitude((float) personNode.path("latitude").asDouble())
 				.setLongitude((float) personNode.path("longitude").asDouble())
-				.addAllTags(parseTags(personNode.path("tags")))
-				.addAllFriends(parseFriends(personNode.path("friends")))
+				.setTags(parseTags(personNode.path("tags")))
+				.setFriends(parseFriends(personNode.path("friends")))
 				.setGreeting(personNode.path("greeting").asText())
 				.setFavoriteFruit(parseFruits(personNode.path("favoriteFruit")))
 				.build();
@@ -76,39 +79,39 @@ public class ProtobufConvertor implements IDataConvertor {
 	}
 	
 	
-	private PersonOuterClass.Person.EyeColor parseEyeColor(JsonNode eyeColorNode) {
+	private EyeColor parseEyeColor(JsonNode eyeColorNode) {
 		
-		PersonOuterClass.Person.EyeColor eyeColor;
+		EyeColor eyeColor;
 		switch (eyeColorNode.asText()) {
 			case "blue":
-				eyeColor = PersonOuterClass.Person.EyeColor.BLUE;
+				eyeColor = EyeColor.blue;
 				break;
 			case "brown":
-				eyeColor = PersonOuterClass.Person.EyeColor.BROWN;
+				eyeColor = EyeColor.brown;
 				break;
 			default:
-				eyeColor = PersonOuterClass.Person.EyeColor.GREEN;
+				eyeColor = EyeColor.green;
 		}
 		return eyeColor;
 	}
 	
-	private PersonOuterClass.Person.Gender parseGender(JsonNode genderNode) {
+	private Gender parseGender(JsonNode genderNode) {
 
-		PersonOuterClass.Person.Gender gender;
+		Gender gender;
 		switch (genderNode.asText()) {
 			case "male":
-				gender = PersonOuterClass.Person.Gender.MALE;
+				gender = Gender.male;
 				break;
 			default:
-				gender = PersonOuterClass.Person.Gender.FEMALE;
+				gender = Gender.female;
 		}
 		return gender;
 	}
 	
 	
-	private List<String> parseTags(JsonNode tagsNode) {
+	private List<CharSequence> parseTags(JsonNode tagsNode) {
 
-		List<String> tags = new ArrayList<>();
+		List<CharSequence> tags = new ArrayList<>();
 		for (JsonNode tagNode : tagsNode) {
 			tags.add(tagNode.asText());
 		}
@@ -116,11 +119,11 @@ public class ProtobufConvertor implements IDataConvertor {
 	}
 	
 	
-	private List<FriendOuterClass.Friend> parseFriends(JsonNode friendsNode) {
+	private List<Friend> parseFriends(JsonNode friendsNode) {
 
-		List<FriendOuterClass.Friend> friends = new ArrayList<>();
+		List<Friend> friends = new ArrayList<>();
 		for (JsonNode friendNode : friendsNode) {
-			FriendOuterClass.Friend friend = FriendOuterClass.Friend.newBuilder()
+			Friend friend = Friend.newBuilder()
 					.setId(friendsNode.path("id").asInt())
 					.setName(friendNode.path("name").asText())
 					.build();
@@ -131,18 +134,18 @@ public class ProtobufConvertor implements IDataConvertor {
 	}
 	
 	
-	private PersonOuterClass.Person.Fruit parseFruits(JsonNode fruitNode) {
+	private Fruit parseFruits(JsonNode fruitNode) {
 
-		PersonOuterClass.Person.Fruit fruit;
+		Fruit fruit;
 		switch (fruitNode.asText()) {
 			case "apple":
-				fruit = PersonOuterClass.Person.Fruit.APPLE;
+				fruit = Fruit.apple;
 				break;
 			case "banana":
-				fruit = PersonOuterClass.Person.Fruit.BANANA;
+				fruit = Fruit.banana;
 				break;
 			default:
-				fruit = PersonOuterClass.Person.Fruit.STRAWBERRY;
+				fruit = Fruit.strawberry;
 		}
 		return fruit;
 	}

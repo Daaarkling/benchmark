@@ -9,8 +9,8 @@ import org.apache.avro.io.DatumWriter;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import benchmark.java.Config;
-import benchmark.java.converters.AvroConvertor;
-import benchmark.java.converters.IDataConvertor;
+import benchmark.java.converters.AvroConverter;
+import benchmark.java.converters.IDataConverter;
 import benchmark.java.metrics.AMetric;
 import benchmark.java.metrics.Info;
 
@@ -39,7 +39,7 @@ public class AvroMetric extends AMetric {
 	@Override
 	protected Object prepareTestDataForSerialize() {
 		
-		IDataConvertor convertor = new AvroConvertor();
+		IDataConverter convertor = new AvroConverter();
 		return convertor.convertData(testDataFile);
 	}
 	

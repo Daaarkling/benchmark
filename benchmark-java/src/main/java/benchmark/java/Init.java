@@ -147,13 +147,6 @@ public class Init {
 				.build();
 		options.addOption(dataOption);
 		
-		Option configOption = Option.builder("c")
-				.hasArg()
-				.argName("config")
-				.desc("Config file.")
-				.build();
-		options.addOption(configOption);
-		
 		Option formatOption = Option.builder("f")
 				.hasArg()
 				.argName("format")

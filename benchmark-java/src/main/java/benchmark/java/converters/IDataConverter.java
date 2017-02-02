@@ -3,7 +3,7 @@ package benchmark.java.converters;
 import java.io.File;
 
 
-public interface IDataConvertor {
+public interface IDataConverter {
 	
 	/**
 	 * Convert given test data into desirable format such as json, xml, pojo,...

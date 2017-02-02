@@ -5,8 +5,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import benchmark.java.converters.IDataConvertor;
-import benchmark.java.converters.PojoConvertor;
+import benchmark.java.converters.IDataConverter;
+import benchmark.java.converters.PojoConverter;
 import benchmark.java.metrics.IMetric;
 import benchmark.java.metrics.MetricResult;
 import benchmark.java.utils.Formatters;
@@ -73,7 +73,7 @@ public abstract class Benchmark {
 	
 	protected Object prepareData() {
 		File testData = config.getTestData();
-		IDataConvertor convertor = new PojoConvertor();
+		IDataConverter convertor = new PojoConverter();
 		return convertor.convertData(testData);
 	}
 

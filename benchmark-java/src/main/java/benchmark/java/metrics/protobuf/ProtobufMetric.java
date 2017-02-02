@@ -3,8 +3,8 @@ package benchmark.java.metrics.protobuf;
 import java.io.InputStream;
 import java.io.OutputStream;
 import benchmark.java.Config;
-import benchmark.java.converters.IDataConvertor;
-import benchmark.java.converters.ProtobufConvertor;
+import benchmark.java.converters.IDataConverter;
+import benchmark.java.converters.ProtobufConverter;
 import benchmark.java.metrics.AMetric;
 import benchmark.java.metrics.Info;
 
@@ -21,7 +21,7 @@ public class ProtobufMetric extends AMetric {
 	@Override
 	protected Object prepareTestDataForSerialize() {
 	
-		IDataConvertor convertor = new ProtobufConvertor();
+		IDataConverter convertor = new ProtobufConverter();
 		return convertor.convertData(testDataFile);
 	}
 
