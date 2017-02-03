@@ -1,9 +1,9 @@
 var	benchmark = require("./modules/benchmark");
 var path = require("path");
 var	cli = require("commander");
-var fs = require('fs');
+var fs = require("fs");
 
-var	formats = ["json", "xml", "msgpack"];
+var	formats = ["json", "xml", "msgpack", "protobuf", "avro"];
 var	outputs = ["console", "csv", "file"];
 
 
@@ -94,6 +94,7 @@ if((cli.output === "csv" || cli.output === "file") && cli.outDir) {
 		process.exit(1);
 	}
 }
+
 
 
 // run

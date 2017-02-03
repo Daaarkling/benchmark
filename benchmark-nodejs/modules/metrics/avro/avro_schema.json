@@ -1,0 +1,65 @@
+{
+	"namespace": "benchmark.java.metrics.avro",
+	"name": "PersonCollection",
+	"type": "record",
+	"fields": [{
+		"name": "persons",
+		"type": {
+			"type": "array",
+			"items": {
+				"name": "Person",
+				"type": "record",
+				"fields": [
+					{"name": "id", "type": "string"},
+					{"name": "index", "type": "int"},
+					{"name": "guid", "type": "string"},
+					{"name": "isActive", "type": "boolean"},
+					{"name": "balance", "type": "string"},
+					{"name": "picture", "type": "string"},
+					{"name": "age", "type": "int"},
+					{"name": "eyeColor", "type": {
+						"type": "enum",
+						"name": "EyeColor",
+						"symbols": ["blue", "brown", "green"]
+					}},
+					{"name": "name", "type": "string"},
+					{"name": "gender", "type": {
+						"type": "enum",
+						"name": "Gender",
+						"symbols": ["male", "female"]
+					}},
+					{"name": "company", "type": "string"},
+					{"name": "email", "type": "string"},
+					{"name": "phone", "type": "string"},
+					{"name": "address", "type": "string"},
+					{"name": "about", "type": "string"},
+					{"name": "registered", "type": "string"},
+					{"name": "latitude", "type": "float"},
+					{"name": "longitude", "type": "float"},
+					{"name": "tags", "type": {
+						"type": "array",
+						"items": "string"
+					}},
+					{"name": "friends", "type": {
+						"type": "array",
+						"items": {
+							"type": "record",
+							"name": "Friend",
+							"fields": [
+								{"name": "id", "type": "int"},
+								{"name": "name", "type": "string"}
+							]
+						}}
+					},
+					{"name": "greeting", "type": "string"},
+					{"name": "favoriteFruit", "type": {
+						"type": "enum",
+						"name": "Fruit",
+						"symbols": ["apple", "banana", "strawberry"]
+					}}
+				]
+			}
+		}
+	}]
+}
+

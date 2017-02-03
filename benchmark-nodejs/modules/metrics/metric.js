@@ -19,8 +19,8 @@ metric.prototype.run = function(testData, repetitions = 1000) {
 		
 	var result = {
 		name: this.fullName(),
-		serialize: 0,
-		deserialize: 0,
+		serialize: [],
+		deserialize: [],
 		size: 0
 	};
 	
@@ -32,18 +32,20 @@ metric.prototype.run = function(testData, repetitions = 1000) {
 	if(this.serialize) {
 		// warm up
 		serializedData = this.serializeImpl(testData);
+		result.size = serializedData.length;
 
 		// run
-		start = process.hrtime();
-		for (var i = 1; i <= repetitions; i++) {
-			this.serializeImpl(testData);
-		}
-		diff = process.hrtime(start);
-		time = diff[0] * 1e9 + diff[1];
+		for (var y = 0; y < 10; y++){
+			start = process.hrtime();
+			for (var i = 0; i < repetitions; i++) {
+				this.serializeImpl(testData);
+			}
+			diff = process.hrtime(start);
+			time = diff[0] * 1e9 + diff[1];
 		
-		// store result
-		result.serialize = time;
-		result.size = serializedData.length;
+			// store result
+			result.serialize.push(time);
+		}
 	} else {
 		serializedData = this.prepareDataForDeserialize(testData);
 		if(!serializedData) {
@@ -57,15 +59,17 @@ metric.prototype.run = function(testData, repetitions = 1000) {
 		this.deserializeImpl(serializedData);
 
 		// run
-		start = process.hrtime();
-		for (var i = 1; i <= repetitions; i++) {
-			this.deserializeImpl(serializedData);
-		}
-		diff = process.hrtime(start);
-		time = diff[0] * 1e9 + diff[1];
+		for (var y = 0; y < 10; y++){
+			start = process.hrtime();
+			for (var i = 0; i < repetitions; i++) {
+				this.deserializeImpl(serializedData);
+			}
+			diff = process.hrtime(start);
+			time = diff[0] * 1e9 + diff[1];
 		
-		// store result
-		result.deserialize = time;
+			// store result
+			result.deserialize.push(time);
+		}
 	}
 	return result;
 };

@@ -6,10 +6,21 @@ var headers = ['Name', 'Serialize (ms)', 'Deserialize (ms)', 'Size (kB)'];
 
 var format = function(result) {
 	result.forEach((item) => {
-		item.serialize = (item.serialize / 1000000).toFixed(4),
-		item.deserialize = (item.deserialize / 1000000).toFixed(4),
-		item.size = (item.size / 1024).toFixed(4)
+		item.serialize = (mean(item.serialize) / 1000000).toFixed(4),
+		item.deserialize = (mean(item.deserialize) / 1000000).toFixed(4),
+		item.size = item.size !== 0 ? (item.size / 1024).toFixed(4) : 0
 	});
+}
+
+var mean = function(numbers) {
+	if(numbers.length) === 0 
+		return 0;
+	
+	var sum = 0;
+	numbers.forEach((number) => {
+		sum += number;
+	});
+	return sum / numbers.length;
 }
 
 
