@@ -18,22 +18,22 @@ class SalsifyJsonStreamingParser implements IMetric
 	{
 		$result = new MetricResult();
 
-		$time = 0;
-		for ($i = 1; $i <= $repetitions; $i++) {
-			$time += $this->deserialize($dataFile);
-		}
+		// warm up
+		$this->deserialize($dataFile);
 
-		$result->setDeserialize($time);
+		for ($j = 0; $j < IMetric::OUTER_REPETITION; $j++) {
+			$time = 0;
+			for ($i = 1; $i <= $repetitions; $i++) {
+				$time += $this->deserialize($dataFile);
+			}
+			$result->addDeserialize($time);
+		}
 		return $result;
 	}
 
-	public function serialize($data)
-	{
-	}
 
 
-
-	public function deserialize($data)
+	private function deserialize($data)
 	{
 		$listener = new InMemoryListener();
 		$stream = fopen($data, 'r');

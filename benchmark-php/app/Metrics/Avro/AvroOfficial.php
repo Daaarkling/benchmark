@@ -19,30 +19,37 @@ class AvroOfficial implements IMetric
 	{
 		$result = new MetricResult();
 
-		$resultSerialize = [];
-		for ($i = 1; $i <= $repetitions; $i++) {
-			$resultSerialize[] = $this->serialize($data);
-		}
+		// Serialization
+		// Do it once to warm up.
+		$this->serialize($data);
 
-		$time = 0;
-		foreach ($resultSerialize as $rS) {
-			$time += $rS['time'];
-		}
-		$result->setSerialize($time);
-		$result->setSize(strlen($rS['string']));
+		for ($j = 0; $j < IMetric::OUTER_REPETITION; $j++) {
+			$resultSerialize = [];
+			for ($i = 1; $i <= $repetitions; $i++) {
+				$resultSerialize[] = $this->serialize($data);
+			}
 
-		$time = 0;
-		for ($i = 1; $i <= $repetitions; $i++) {
-			$time += $this->deserialize($rS['string']);
-		}
+			$time = 0;
+			foreach ($resultSerialize as $rS) {
+				$time += $rS['time'];
+			}
 
-		$result->setDeserialize($time);
+			$result->addSerialize($time);
+			$result->setSize(strlen($rS['string']));
+
+
+			$time = 0;
+			for ($i = 1; $i <= $repetitions; $i++) {
+				$time += $this->deserialize($rS['string']);
+			}
+			$result->addDeserialize($time);
+		}
 		return $result;
 	}
 
 
 
-	public function serialize($data)
+	private function serialize($data)
 	{
 		$schema = file_get_contents(__DIR__ . '/../../Converters/Avro/avro_schema.json');
 		$writerSchema = \AvroSchema::parse($schema);
@@ -64,7 +71,7 @@ class AvroOfficial implements IMetric
 
 
 
-	public function deserialize($data)
+	private function deserialize($data)
 	{
 		$readIO = new AvroStringIO($data);
 

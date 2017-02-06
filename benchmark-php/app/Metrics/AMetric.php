@@ -27,51 +27,41 @@ abstract class AMetric implements IMetric
 		$result = new MetricResult();
 		$this->prepareBenchmark();
 		$data = $this->prepareDataForSerialize();
-		$outputS = FALSE;
-		$outputD = FALSE;
 
-
+		// Serialization
 		// Do it once to warm up.
-		$this->serialize($data);
-
-
-		// Run serialization
-		$start = microtime(TRUE);
-		for ($i = 1; $i <= $repetitions; $i++) {
-			$outputS = $this->serialize($data);
-		}
-		$time = microtime(TRUE) - $start;
-
-
-		// Handle serialization result
-		if ($outputS !== FALSE) {
-			$result->setSerialize($time);
-			$encodedData = $outputS;
+		$encodedData = $this->serialize($data);
+		if ($encodedData) {
+			for ($j = 0; $j < IMetric::OUTER_REPETITION; $j++) {
+				$start = microtime(TRUE);
+				for ($i = 0; $i < $repetitions; $i++) {
+					$this->serialize($data);
+				}
+				$time = microtime(TRUE) - $start;
+				$result->addSerialize($time);
+			}
 			$size = strlen($encodedData);
 			$result->setSize($size);
 		} else {
 			$encodedData = $this->prepareDataForDeserialize();
-			if (!is_string($encodedData)) {
+			if (!$encodedData) {
 				return $result;
 			}
 		}
 
+		// Deserialization
 		// Do it once to warm up.
-		$this->deserialize($encodedData);
-
-		// Run deserialization
-		$start = microtime(TRUE);
-		for ($i = 1; $i <= $repetitions; $i++) {
-			$outputD = $this->deserialize($encodedData);
+		$outputD = $this->deserialize($encodedData);
+		if($outputD) {
+			for ($j = 0; $j < IMetric::OUTER_REPETITION; $j++) {
+				$start = microtime(TRUE);
+				for ($i = 1; $i <= $repetitions; $i++) {
+					$this->deserialize($encodedData);
+				}
+				$time = microtime(TRUE) - $start;
+				$result->addDeserialize($time);
+			}
 		}
-		$time = microtime(TRUE) - $start;
-
-
-		// Handle deserialization result
-		if ($outputD === TRUE) {
-			$result->setDeserialize($time);
-		}
-
 		return $result;
 	}
 
@@ -96,30 +86,37 @@ abstract class AMetric implements IMetric
 
 
 	/**
-	 * If serialize() returns FALSE this method must return string, otherwise deserialize() wont proceed
+	 * If serialize() method is not implemented this method must be otherwise deserialize() wont proceed
 	 *
 	 * @return mixed
 	 */
 	protected function prepareDataForDeserialize()
 	{
+		return NULL;
 	}
 
 
 	/**
+	 * Method should return result of serialize if everything went well (result will be used for deserialize) or
+	 * FALSE if serialize is not implemented, in that case method prepareDataForDeserialize() must be implemented
+	 *
 	 * @param mixed $data
 	 * @return string|FALSE
 	 */
-	public function serialize($data)
+	protected function serialize($data)
 	{
 		return FALSE;
 	}
 
 
 	/**
+	 * Method should return TRUE if everything went well or
+	 * FALSE if deserialize is not implemented
+	 *
 	 * @param mixed $data
 	 * @return bool
 	 */
-	public function deserialize($data)
+	protected function deserialize($data)
 	{
 		return FALSE;
 	}

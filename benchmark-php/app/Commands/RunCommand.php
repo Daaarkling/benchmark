@@ -33,13 +33,12 @@ class RunCommand extends Command
 	{
 		$this->setName('benchmark:run')
 			->setDescription('Run benchmark with given config and test data.')
-			->setHelp('First run validation any potential errors are shown in console. Then proceed to benchmark itself. You can choose from several options how to handle result: ' . implode(', ', self::OUTPUTS) . '.')
 			->addOption('config', 'c', InputOption::VALUE_REQUIRED, 'Set config file.')
-			->addOption('data', 'd', InputOption::VALUE_REQUIRED, 'Set test data.')
+			->addOption('data', 't', InputOption::VALUE_REQUIRED, 'Set test data.')
 			->addOption('repetitions', 'r', InputOption::VALUE_REQUIRED, 'Set number of repetitions', Config::REPETITIONS_DEFAULT)
 			->addOption('output', 'o', InputOption::VALUE_REQUIRED, 'Set output. You can choose from several choices: ' . implode(', ', self::OUTPUTS) . '.', 'console')
 			->addOption('format', 'f', InputOption::VALUE_REQUIRED, 'Run benchmark for specific format only.')
-			->addOption('out_dir', 'od', InputOption::VALUE_REQUIRED, 'Output directory.');
+			->addOption('out_dir', 'd', InputOption::VALUE_REQUIRED, 'Output directory.');
 	}
 
 

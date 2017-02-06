@@ -25,26 +25,16 @@ class BenchmarkCsvOutput extends Benchmark
 
 	protected function transformResult($result)
 	{
-		$headers = ["Name", "Serialize (ms)", "Deserialize (ms)", "Size (B)"];
-		$rows = [];
-
-		foreach ($result as $typeName => $libs) {
-			foreach ($libs as $metricResult) {
-				$rows[] = [
-					'php - ' . $typeName . ' - ' . $metricResult->getName(),
-					round($metricResult->getSerialize() * 1000, 4),
-					round($metricResult->getDeserialize() * 1000, 4),
-					$metricResult->getSize(),
-				];
-			}
+		$rows = parent::transformResult($result);
+		for ($i = 0; $i < count($rows); $i++) {
+			$rows[$i][0] = 'php - ' . $rows[$i][0];
 		}
-		$this->handleResult($headers, $rows);
+		return $rows;
 	}
 
 
 	protected function handleResult($headers, $rows)
 	{
-		$headers = ["Name", "Serialize (ms)", "Deserialize (ms)", "Size (B)"];
 		$name = $this->outputDir . '/' . self::$fileName;
 		$csv = Writer::createFromPath($name, 'w');
 		$csv->setDelimiter(';');

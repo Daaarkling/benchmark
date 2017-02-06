@@ -12,13 +12,42 @@ class MetricResult
 	/** @var int */
 	private $size;
 
-	/** @var float */
-	private $serialize;
+	/** @var float[] */
+	private $serialize = [];
 
-	/** @var float */
-	private $deserialize;
+	/** @var float[] */
+	private $deserialize = [];
 
+	/**
+	 * @param float $time
+	 */
+	public function addSerialize($time) {
 
+		$this->serialize[] = $time;
+	}
+
+	/**
+	 * @param float $time
+	 */
+	public function addDeserialize($time) {
+
+		$this->deserialize[] = $time;
+	}
+
+	/**
+	 * @param float[] $numbers
+	 * @return float
+	 */
+	private function computeMean($numbers) {
+
+		$count = count($numbers);
+		if($count == 0) return 0;
+		$sum = 0;
+		foreach ($numbers as $number) {
+			$sum += $number;
+		}
+		return $sum / $count;
+	}
 
 	/**
 	 * @return string
@@ -53,33 +82,41 @@ class MetricResult
 	}
 
 	/**
-	 * @return float
+	 * @param bool $mean
+	 * @return float[]|float
 	 */
-	public function getSerialize()
+	public function getSerialize($mean = TRUE)
 	{
+		if($mean) {
+			return $this->computeMean($this->serialize);
+		}
 		return $this->serialize;
 	}
 
 	/**
-	 * @param float $serialize
+	 * @param float[] $serialize
 	 */
-	public function setSerialize($serialize)
+	public function setSerialize(array $serialize)
 	{
 		$this->serialize = $serialize;
 	}
 
 	/**
-	 * @return float
+	 * @param bool $mean
+	 * @return float[]|float
 	 */
-	public function getDeserialize()
+	public function getDeserialize($mean = TRUE)
 	{
+		if($mean) {
+			return $this->computeMean($this->deserialize);
+		}
 		return $this->deserialize;
 	}
 
 	/**
-	 * @param float $deserialize
+	 * @param float[] $deserialize
 	 */
-	public function setDeserialize($deserialize)
+	public function setDeserialize(array $deserialize)
 	{
 		$this->deserialize = $deserialize;
 	}

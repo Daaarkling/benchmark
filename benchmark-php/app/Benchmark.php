@@ -53,28 +53,38 @@ abstract class Benchmark
 				$result[$formatName][] = $metricResult;
 			}
 		}
-		$this->transformResult($result);
+
+
+		$rows = $this->transformResult($result);
+		$headers = ["Name", "Serialize (ms)", "Deserialize (ms)", "Size (kB)"];
+		$this->handleResult($headers, $rows);
 	}
 
 
-
+	/**
+	 * @param array $result
+	 * @return array
+	 */
 	protected function transformResult($result)
 	{
-		$headers = ["Name", "Serialize", "Deserialize", "Size"];
 		$rows = [];
-
 		foreach ($result as $typeName => $libs) {
 			foreach ($libs as $metricResult) {
 				$rows[] = [
 					$typeName . ' - ' . $metricResult->getName(),
-					$metricResult->getSerialize() !== NULL ? Formatters::seconds($metricResult->getSerialize()) : "---",
-					$metricResult->getDeserialize() !== NULL ? Formatters::seconds($metricResult->getDeserialize()) : "---",
-					$metricResult->getSerialize() !== NULL ? Formatters::bytes($metricResult->getSize()) : "---",
+					$metricResult->getSerialize() !== NULL ? round($metricResult->getSerialize() * 1000, 4) : 0,
+					$metricResult->getDeserialize() !== NULL ? round($metricResult->getDeserialize() * 1000, 4) : 0,
+					$metricResult->getSerialize() !== NULL ? round($metricResult->getSize() / 1024, 4) : 0,
 				];
 			}
 		}
 
-		$this->handleResult($headers, $rows);
+		// sort by name
+		uasort($rows, function ($a, $b) {
+			return $a[0] > $b[0];
+		});
+
+		return $rows;
 	}
 
 
