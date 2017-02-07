@@ -7,7 +7,7 @@ namespace Benchmark;
 class Config
 {
 	const FORMATS = ['native', 'json', 'xml', 'avro', 'msgpack', 'protobuf'];
-	const REPETITIONS_DEFAULT = 100;
+	const REPETITIONS_DEFAULT = 1000;
 
 	/** @var string */
 	public static $configFile = __DIR__ . '/../config/config.json';
