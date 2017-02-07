@@ -16,11 +16,13 @@ import benchmark.java.metrics.Info;
 public class GsonMetric extends AMetric {
 	
 	private Gson gson;
+	private final Info info = new Info(Config.Format.JSON, "Gson", "https://github.com/google/gson", "2.8.0");
+
 
 	
 	@Override
 	public Info getInfo() {
-		return new Info(Config.Format.JSON, "Gson", "https://github.com/google/gson", "2.8.0");
+		return info;
 	}
 	
 	

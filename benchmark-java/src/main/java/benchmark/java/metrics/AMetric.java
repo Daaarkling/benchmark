@@ -16,6 +16,7 @@ public abstract class AMetric implements IMetric {
 
 	protected Object testData;
 	protected File testDataFile;
+	protected byte[] dataForDeserialize;
 
 
 	@Override
@@ -28,63 +29,51 @@ public abstract class AMetric implements IMetric {
 
 		MetricResult result = new MetricResult();
 		result.setInfo(getInfo());
-		Object dataForEncode = prepareTestDataForSerialize();
-		byte[] dataForDecode;
-		boolean encodeImplemented = false;
-		Object decodeImplemented = null;
+		Object dataForSerialize = prepareDataForSerialize();
 		long start, time;
 
 		try {
 			// Serialize
 			// Do it once to warm up.
-			serialize(dataForEncode, new ByteArrayOutputStream());
-		//	output.reset();
-
-			start = System.nanoTime();
-			for (int i = 1; i <= repetitions; i++) {
-				encodeImplemented = serialize(dataForEncode, new ByteArrayOutputStream());
-			}
-			time = System.nanoTime() - start;
-
-			if (encodeImplemented) {
-				result.setSerialize(time);
-				
-				// Deserialize just one data not multiple data stacked on each other
-				ByteArrayOutputStream output = new ByteArrayOutputStream();
-				serialize(dataForEncode, output);
-				result.setSize(output.size());
-				dataForDecode = output.toByteArray();
-				output.close();
-			} else {
-				dataForDecode = prepareTestDataForDeserialize();
-				if (dataForDecode == null) {
-					return result;
-				}
-			}
+			ByteArrayOutputStream output = new ByteArrayOutputStream();
+			boolean outputS = serialize(dataForSerialize, output);
 			
-
+			if(outputS) {
+				for (int j = 0; j < OUTER_REPETITION; j++){
+					start = System.nanoTime();
+					for (int i = 0; i < repetitions; i++) {
+						serialize(dataForSerialize, new ByteArrayOutputStream());
+					}
+					time = System.nanoTime() - start;
+					result.addSerialize(time);
+				}
+				dataForDeserialize = output.toByteArray();
+				result.setSize(output.size());
+				output.close();
+			}
 		} catch (Exception ex) {
 			Logger.getLogger(AMetric.class.getName()).log(Level.SEVERE, null, ex);
-
-			dataForDecode = prepareTestDataForDeserialize();
-			if (dataForDecode == null) {
-				return result;
-			}
 		}
+		
 
 		try {
 			// Deserialize
+			dataForDeserialize = prepareDataForDeserialize();
+			if (dataForDeserialize == null) {
+				return result;
+			}			
+
 			// Do it once to warm up.
-			deserialize(new ByteArrayInputStream(dataForDecode), dataForDecode);
-
-			start = System.nanoTime();
-			for (int i = 1; i <= repetitions; i++) {
-				decodeImplemented = deserialize(new ByteArrayInputStream(dataForDecode), dataForDecode);
-			}
-			time = System.nanoTime() - start;
-
-			if (decodeImplemented != null) {
-				result.setDeserialize(time);
+			Object outputD = deserialize(new ByteArrayInputStream(dataForDeserialize), dataForDeserialize);
+			if (outputD != null){
+				for (int j = 0; j < OUTER_REPETITION; j++) {
+					start = System.nanoTime();
+					for (int i = 0; i < repetitions; i++) {
+						deserialize(new ByteArrayInputStream(dataForDeserialize), dataForDeserialize);
+					}
+					time = System.nanoTime() - start;
+					result.addDeserialize(time);
+				}
 			}
 		} catch (Exception ex) {
 			Logger.getLogger(AMetric.class.getName()).log(Level.SEVERE, null, ex);
@@ -100,25 +89,49 @@ public abstract class AMetric implements IMetric {
 	protected void prepareBenchmark(){
 	}
 
-	@Override
-	public boolean serialize(Object data, OutputStream output) throws Exception {
+
+	/**
+	 * Method should return true and write data into output if everything went well
+	 * (result will be used for deserialize) or false if serialize is not
+	 * implemented, in that case method prepareDataForDeserialize() must be
+	 * implemented
+	 * 
+	 * @param data
+	 * @param output
+	 * @return
+	 * @throws Exception 
+	 */
+	protected boolean serialize(Object data, OutputStream output) throws Exception {
 		return false;
 	}
 
-	@Override
-	public Object deserialize(InputStream input, byte[] bytes) throws Exception {
+
+	/**
+	 * Method should return Object of deserialized data if everything went well 
+	 * or null if deserialize is not implemented
+	 * 
+	 * @param input
+	 * @param bytes
+	 * @return
+	 * @throws Exception 
+	 */
+	protected Object deserialize(InputStream input, byte[] bytes) throws Exception {
 		return null;
 	}
 	
 	
-	protected Object prepareTestDataForSerialize() {
-		return this.testData;
+	protected Object prepareDataForSerialize() {
+		return testData;
 	}
 
 
-	protected byte[] prepareTestDataForDeserialize() {
-		return null;
+	/**
+	 * If serialize() method is not implemented this method must be otherwise
+	 * deserialize() wont proceed
+	 *
+	 * @return
+	 */
+	protected byte[] prepareDataForDeserialize() {
+		return dataForDeserialize;
 	}
-
-
 }

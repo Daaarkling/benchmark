@@ -12,10 +12,11 @@ import benchmark.java.metrics.Info;
 
 public class FastjsonMetric extends AMetric {
 	
+	private final Info info = new Info(Config.Format.JSON, "Fastjson", "https://github.com/alibaba/fastjson", "1.2.23");
 	
 	@Override
 	public Info getInfo() {
-		return new Info(Config.Format.JSON, "Fastjson", "https://github.com/alibaba/fastjson", "1.2.23");
+		return info;
 	}
 	
 	

@@ -18,11 +18,13 @@ public class JaxbMetric extends AMetric {
 	
 	private Marshaller marshaller;
 	private Unmarshaller unmarshaller;
+	private final Info info = new Info(Config.Format.XML, "JAXB", "https://jaxb.java.net/");
+
 	
 	
 	@Override
 	public Info getInfo() {
-		return new Info(Config.Format.XML, "JAXB", "https://jaxb.java.net/");
+		return info;
 	}
 	
 

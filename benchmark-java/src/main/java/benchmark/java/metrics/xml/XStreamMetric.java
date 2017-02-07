@@ -14,11 +14,13 @@ import benchmark.java.metrics.Info;
 public class XStreamMetric extends AMetric {
 	
 	private XStream xstream;
+	private final Info info = new Info(Config.Format.XML, "XStream", "https://github.com/x-stream/xstream", "1.4.9");
+
 
 	
 	@Override
 	public Info getInfo() {
-		return new Info(Config.Format.XML, "XStream", "https://github.com/x-stream/xstream", "1.4.9");
+		return info;
 	}
 	
 	

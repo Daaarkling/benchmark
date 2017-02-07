@@ -12,10 +12,12 @@ import benchmark.java.metrics.Info;
 public class MsgPackMetric extends AMetric {
 	
 	private ObjectMapper objectMapper;
+	private final Info info = new Info(Config.Format.MSGPACK, "MsgPack", "https://github.com/msgpack/msgpack-java", "0.8.11");
+
 
 	@Override
 	public Info getInfo() {
-		return new Info(Config.Format.MSGPACK, "MsgPack", "https://github.com/msgpack/msgpack-java", "0.8.11");
+		return info;
 	}
 	
 	@Override

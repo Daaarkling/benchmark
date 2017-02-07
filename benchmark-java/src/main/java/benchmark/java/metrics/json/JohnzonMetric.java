@@ -14,11 +14,13 @@ import benchmark.java.metrics.Info;
 public class JohnzonMetric extends AMetric {
 	
 	private Mapper mapper;
+	private final Info info = new Info(Config.Format.JSON, "Johnzon", "http://johnzon.apache.org/", "1.0.0");
+
 
 	
 	@Override
 	public Info getInfo() {
-		return new Info(Config.Format.JSON, "Johnzon", "http://johnzon.apache.org/", "1.0.0");
+		return info;
 	}
 	
 	

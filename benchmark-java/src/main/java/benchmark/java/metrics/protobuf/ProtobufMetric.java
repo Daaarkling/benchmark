@@ -11,15 +11,17 @@ import benchmark.java.metrics.Info;
 
 public class ProtobufMetric extends AMetric {
 
+	private final Info info = new Info(Config.Format.PROTOBUF, "Google Protobuf", "https://github.com/google/protobuf", "3.1.0");
+
 	
 	@Override
 	public Info getInfo() {
-		return new Info(Config.Format.PROTOBUF, "Google Protobuf", "https://github.com/google/protobuf", "3.1.0");
+		return info;
 	}
 	
 	
 	@Override
-	protected Object prepareTestDataForSerialize() {
+	protected Object prepareDataForSerialize() {
 	
 		IDataConverter convertor = new ProtobufConverter();
 		return convertor.convertData(testDataFile);

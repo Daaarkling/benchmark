@@ -12,9 +12,12 @@ import benchmark.java.metrics.Info;
 
 public class LoganSquareMetric extends AMetric {
 	
+	private final Info info = new Info(Config.Format.JSON, "LoganSquare", "https://github.com/bluelinelabs/LoganSquare", "1.3.7");
+
+	
 	@Override
 	public Info getInfo() {
-		return new Info(Config.Format.JSON, "LoganSquare", "https://github.com/bluelinelabs/LoganSquare", "1.3.7");
+		return info;
 	}
 	
 	@Override

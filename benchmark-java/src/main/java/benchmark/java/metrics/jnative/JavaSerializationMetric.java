@@ -12,9 +12,11 @@ import benchmark.java.metrics.Info;
 
 public class JavaSerializationMetric extends AMetric {
 	
+	private final Info info = new Info(Config.Format.NATIVE, "JavaSerialization", "https://docs.oracle.com/javase/tutorial/essential/io/objectstreams.html");
+	
 	@Override
 	public Info getInfo() {
-		return new Info(Config.Format.NATIVE, "JavaSerialization", "https://docs.oracle.com/javase/tutorial/essential/io/objectstreams.html");
+		return info;
 	}
 	
 	@Override

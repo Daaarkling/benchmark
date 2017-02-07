@@ -13,11 +13,12 @@ import benchmark.java.metrics.Info;
 public class JacksonAfterburnerMetric extends AMetric {
 	
 	private ObjectMapper mapper;
+	private final Info info = new Info(Config.Format.JSON, "JacksonAfterburner", "https://github.com/FasterXML/jackson-modules-base/tree/master/afterburner", "2.8.5");
 
 	
 	@Override
 	public Info getInfo() {
-		return new Info(Config.Format.JSON, "JacksonAfterburner", "https://github.com/FasterXML/jackson-modules-base/tree/master/afterburner", "2.8.5");
+		return info;
 	}
 	
 	

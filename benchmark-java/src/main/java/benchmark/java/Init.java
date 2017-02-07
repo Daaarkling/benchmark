@@ -45,8 +45,8 @@ public class Init {
 			}
 			
 			String outputDir = ".";
-			if ((output.equals(OUTPUT_CSV) || output.equals(OUTPUT_FILE)) && cmd.hasOption("od")) {
-				outputDir = cmd.getOptionValue("od");
+			if ((output.equals(OUTPUT_CSV) || output.equals(OUTPUT_FILE)) && cmd.hasOption("d")) {
+				outputDir = cmd.getOptionValue("d");
 				File outputDirFile = new File(outputDir);
 				if (!outputDirFile.isDirectory() || !outputDirFile.canWrite()) {
 					System.err.println("Output path is not directory or is not writable.");
@@ -64,11 +64,11 @@ public class Init {
 				}
 			}
 
-			int repetitions = 100;
+			Integer repetitions = null;
 			if (cmd.hasOption("r")) {
 				String repGiven = cmd.getOptionValue("r");
 				try {
-					repetitions = Integer.parseInt(repGiven);
+					repetitions = Integer.valueOf(repGiven);
 					if (repetitions < 1) {
 						System.err.println("Repetitions must be whole number greater than zero.");
 						System.exit(1);
@@ -80,8 +80,8 @@ public class Init {
 			}
 
 			File testDataFile = new File(Config.testDataPath);
-			if (cmd.hasOption("d")) {
-				String dataGiven = cmd.getOptionValue("d");
+			if (cmd.hasOption("t")) {
+				String dataGiven = cmd.getOptionValue("t");
 				testDataFile = new File(dataGiven);
 			}
 			if (!testDataFile.isFile()) {
@@ -140,7 +140,7 @@ public class Init {
 				.build();
 		options.addOption(repOption);
 		
-		Option dataOption = Option.builder("d")
+		Option dataOption = Option.builder("t")
 				.hasArg()
 				.argName("data")
 				.desc("Test data.")
@@ -154,7 +154,7 @@ public class Init {
 				.build();
 		options.addOption(formatOption);
 		
-		Option outputDirOption = Option.builder("od")
+		Option outputDirOption = Option.builder("d")
 				.hasArg()
 				.argName("out_dir")
 				.desc("Output directory.")

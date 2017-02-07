@@ -12,11 +12,13 @@ import benchmark.java.metrics.Info;
 public class JacksonMetric extends AMetric {
 	
 	private ObjectMapper mapper;
+	private final Info info = new Info(Config.Format.JSON, "Jackson", "https://github.com/FasterXML/jackson", "2.8.5");
+
 
 	
 	@Override
 	public Info getInfo() {
-		return new Info(Config.Format.JSON, "Jackson", "https://github.com/FasterXML/jackson", "2.8.5");
+		return info;
 	}
 	
 	@Override

@@ -12,10 +12,12 @@ import benchmark.java.metrics.Info;
 
 public class JsonIOMetric extends AMetric {
 	
+	private final Info info = new Info(Config.Format.JSON, "Json-io", "https://github.com/jdereg/json-io", "4.9.5");
+
 
 	@Override
 	public Info getInfo() {
-		return new Info(Config.Format.JSON, "Json-io", "https://github.com/jdereg/json-io", "4.9.5");
+		return info;
 	}
 	
 	

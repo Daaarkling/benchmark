@@ -1,15 +1,44 @@
 package benchmark.java.metrics;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 
 public class MetricResult {
 	
 	private Info info;
 	private int size;
-	private long serialize;
-	private long deserialize;
+	private List<Long> serialize = new ArrayList<>();
+	private List<Long> deserialize = new ArrayList<>();
 
+	public void addSerialize(Long time) {
+		serialize.add(time);
+	}
 	
+	public void addDeserialize(Long time) {
+		deserialize.add(time);
+	}
+	
+	private double computeMean(List<Long> times) {
+		
+		if (times.isEmpty())
+			return 0;
+		
+		Long sum = 0l;
+		for(Long time : times) {
+			sum += time;
+		}
+		return sum / (double) times.size();
+	}
+	
+	public double getSerializeMean() {		
+		return computeMean(serialize);
+	}
+
+	public double getDeserializeMean() {
+		return computeMean(deserialize);
+	}
 	
 	public Info getInfo() {
 		return info;
@@ -27,19 +56,21 @@ public class MetricResult {
 		this.size = size;
 	}
 
-	public long getSerialize() {
+	public List<Long> getSerialize() {
 		return serialize;
 	}
 
-	public void setSerialize(long serialize) {
+	public void setSerialize(List<Long> serialize) {
 		this.serialize = serialize;
 	}
 
-	public long getDeserialize() {
+	public List<Long> getDeserialize() {
 		return deserialize;
 	}
 
-	public void setDeserialize(long deserialize) {
+	public void setDeserialize(List<Long> deserialize) {
 		this.deserialize = deserialize;
 	}
+
+	
 }

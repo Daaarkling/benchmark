@@ -9,15 +9,8 @@ import benchmark.java.converters.IDataConverter;
 import benchmark.java.converters.PojoConverter;
 import benchmark.java.metrics.IMetric;
 import benchmark.java.metrics.MetricResult;
-import benchmark.java.utils.Formatters;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 
 public abstract class Benchmark {
@@ -47,25 +40,30 @@ public abstract class Benchmark {
 			}
 		}
 		result.sort((p1, p2) -> p1.getInfo().getFullName().compareTo(p2.getInfo().getFullName()));
-		transformResult(result);
+		
+		List<List<String>> rows = transformResult(result);
+		List<String> headers = Arrays.asList(new String[]{"Name", "Serialize (ms)", "Deserialize (ms)", "Size (kB)"});
+		handleResult(headers, rows);
 	}
 	
-	protected void transformResult(List<MetricResult> result) {
+	protected List<List<String>> transformResult(List<MetricResult> result) {
 		
-		List<String> headers = Arrays.asList(new String[]{"Name", "Serialize", "Deserialize", "Size"});
 		List<List<String>> rows = new ArrayList<>();
 
 		for (MetricResult metricResult : result) {
 			List<String> row = new ArrayList<>();
-			// pretty format of times and size
+			
+			double serializeMean = metricResult.getSerializeMean();
+			double deserializeMean = metricResult.getDeserializeMean();
+			double size = metricResult.getSize();
+			
 			row.add(metricResult.getInfo().getFullName());
-			row.add(metricResult.getSerialize() != 0 ? Formatters.seconds(metricResult.getSerialize()) : "---");
-			row.add(metricResult.getDeserialize() != 0 ? Formatters.seconds(metricResult.getDeserialize()) : "---");
-			row.add(metricResult.getSerialize() != 0 ? Formatters.bytes(metricResult.getSize()) : "---");	
+			row.add(serializeMean != 0 ? new BigDecimal(serializeMean).divide(new BigDecimal("1000000"), 4, RoundingMode.FLOOR).toString() : "0");
+			row.add(deserializeMean != 0 ? new BigDecimal(deserializeMean).divide(new BigDecimal("1000000"), 4, RoundingMode.FLOOR).toString() : "0");
+			row.add(size != 0 ? new BigDecimal(size).divide(new BigDecimal("1024"), 4, RoundingMode.FLOOR).toString() : "0");	
 			rows.add(row);
 		}
-		
-		handleResult(headers, rows);
+		return rows;
 	}
 	
 	protected abstract void handleResult(List<String> headers, List<List<String>> rows);

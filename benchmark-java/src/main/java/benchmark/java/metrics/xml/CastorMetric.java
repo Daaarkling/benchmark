@@ -17,11 +17,13 @@ public class CastorMetric extends AMetric {
 	
 	private Marshaller marshaller;
 	private Unmarshaller unmarshaller;
+	private final Info info = new Info(Config.Format.XML, "Castor", "https://github.com/castor-data-binding/castor", "1.4.1");
+
 
 	
 	@Override
 	public Info getInfo() {
-		return new Info(Config.Format.XML, "Castor", "https://github.com/castor-data-binding/castor", "1.4.1");
+		return info;
 	}
 	
 	

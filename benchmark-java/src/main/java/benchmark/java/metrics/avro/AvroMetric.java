@@ -19,12 +19,12 @@ public class AvroMetric extends AMetric {
 	
 	private DataFileWriter<PersonCollection> dataFileWriter;
 	private DatumReader<PersonCollection> datumReader;
-
+	private final Info info = new Info(Config.Format.AVRO, "Avro", "https://avro.apache.org/", "1.8.1");
 
 
 	@Override
 	public Info getInfo() {
-		return new Info(Config.Format.AVRO, "Avro", "https://avro.apache.org/", "1.8.1");
+		return info;
 	}
 
 	
@@ -37,7 +37,7 @@ public class AvroMetric extends AMetric {
 	}
 
 	@Override
-	protected Object prepareTestDataForSerialize() {
+	protected Object prepareDataForSerialize() {
 		
 		IDataConverter convertor = new AvroConverter();
 		return convertor.convertData(testDataFile);
