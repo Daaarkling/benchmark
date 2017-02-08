@@ -44,14 +44,6 @@ if(cli.testData) {
 }
 
 // set config values from cli
-if(cli.output) {
-	if (formats.includes(cli.format)) {
-		config.format = cli.format;
-	} else {
-		console.error("\n  error: Format must be one of these options: " + formats.join(", ") + "\n");
-		process.exit(1);
-	}
-}
 
 if(cli.repetitions) {
 	if (parseInt(cli.repetitions) && cli.repetitions > 0) {

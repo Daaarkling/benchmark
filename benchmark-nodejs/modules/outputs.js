@@ -6,14 +6,17 @@ var headers = ['Name', 'Serialize (ms)', 'Deserialize (ms)', 'Size (kB)'];
 
 var format = function(result) {
 	result.forEach((item) => {
-		item.serialize = (mean(item.serialize) / 1000000).toFixed(4),
-		item.deserialize = (mean(item.deserialize) / 1000000).toFixed(4),
+		var serializeMean = mean(item.serialize);
+		var deserializeMean = mean(item.deserialize)
+	
+		item.serialize = serializeMean !== 0 ? (serializeMean / 1000000).toFixed(4) : 0,
+		item.deserialize = deserializeMean !== 0 ? (deserializeMean / 1000000).toFixed(4) : 0,
 		item.size = item.size !== 0 ? (item.size / 1024).toFixed(4) : 0
 	});
 }
 
 var mean = function(numbers) {
-	if(numbers.length) === 0 
+	if(numbers.length === 0) 
 		return 0;
 	
 	var sum = 0;
@@ -27,6 +30,9 @@ var mean = function(numbers) {
 exports.csv = function(result, outDir = "./") {
 	
 	format(result);
+	result.forEach((item) => {
+		item.name = "nodejs - " + item.name;
+	});
 	
 	var fields = ['name', 'serialize', 'deserialize', 'size'];
 
