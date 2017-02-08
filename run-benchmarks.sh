@@ -126,11 +126,13 @@ done
 function runBenchmarks () {
 	if [ "$format" != "" ]
 	then
-		php ./benchmark-php/init.php b:r -r "$repetitions" -o "$output" --out_dir="$outputDir" -f "$format" -d "$testData" > /dev/null
-		java -jar benchmark-java/target/benchmark-java-1.0-jar-with-dependencies.jar-r "$repetitions" -o "$output" -od "$outputDir" -f "$format" -d "$testData" > /dev/null
+		php ./benchmark-php/init.php b:r -r "$repetitions" -o "$output" -d "$outputDir" -f "$format" -t "$testData" > /dev/null
+		java -jar benchmark-java/target/benchmark-java-1.0-jar-with-dependencies.jar -r "$repetitions" -o "$output" -d "$outputDir" -f "$format" -t "$testData" > /dev/null
+		node ./benchmark-nodejs/init.js -r "$repetitions" -o "$output" -d "$outputDir" -f "$format" -t "$testData" > /dev/null
 	else
-		php ./benchmark-php/init.php b:r -r "$repetitions" -o "$output" --out_dir="$outputDir" -d "$testData" > /dev/null
-		java -jar benchmark-java/target/benchmark-java-1.0-jar-with-dependencies.jar -r "$repetitions" -o "$output" -od "$outputDir" -d "$testData" > /dev/null
+		php ./benchmark-php/init.php b:r -r "$repetitions" -o "$output" -d "$outputDir" -t "$testData" > /dev/null
+		java -jar benchmark-java/target/benchmark-java-1.0-jar-with-dependencies.jar -r "$repetitions" -o "$output" -d "$outputDir" -t "$testData" > /dev/null
+		node ./benchmark-nodejs/init.js -r "$repetitions" -o "$output" -d "$outputDir" -t "$testData" > /dev/null
 	fi
 }
 
@@ -142,13 +144,14 @@ function plot () {
 	
 	phpCsv="php-benchmark-output.csv"
 	javaCsv="java-benchmark-output.csv"
+	nodeCsv="nodejs-benchmark-output.csv"
 	
-	if [ -f "$outDir$phpCsv" ] && [ -r "$outDir$phpCsv" ] && [ -f "$outDir$javaCsv" ] && [ -r "$outDir$javaCsv" ]
+	if [ -f "$outDir$phpCsv" ] && [ -r "$outDir$phpCsv" ] && [ -f "$outDir$javaCsv" ] && [ -r "$outDir$javaCsv" ] && [ -f "$outDir$nodeCsv" ] && [ -r "$outDir$nodeCsv" ]
 	then
 		# create temp file and write into it combined result of benchmarks
 		temp=$(mktemp /tmp/benchmark-combined.csv.XXXXXX)
-		$(cat php-benchmark-output.csv <(tail -n+2 java-benchmark-output.csv) > $temp)
-		
+		$(cat php-benchmark-output.csv <(tail -n+2 java-benchmark-output.csv) <(tail -n+2 nodejs-benchmark-output.csv) > $temp)
+
 		gnuplot -persist <<-EOFMarker
 			
 			set datafile separator ";"			# csv separator
@@ -177,7 +180,7 @@ echo "$format"
 echo "$testData"
 
 
-runBenchmarks
+#runBenchmarks
 plot
 echo "Benchmark run successfully!"
 
