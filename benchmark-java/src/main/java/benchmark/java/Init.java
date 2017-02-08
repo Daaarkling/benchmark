@@ -156,7 +156,7 @@ public class Init {
 		
 		Option outputDirOption = Option.builder("d")
 				.hasArg()
-				.argName("out_dir")
+				.argName("out-dir")
 				.desc("Output directory.")
 				.build();
 		options.addOption(outputDirOption);

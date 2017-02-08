@@ -1,5 +1,6 @@
 package benchmark.java;
 
+import benchmark.java.metrics.MetricResult;
 import com.opencsv.CSVWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -20,6 +21,17 @@ public class BenchmarkCsvOutput extends Benchmark {
 		this.outputDir = outputDir;
 	}
 
+
+	@Override
+	protected List<List<String>> transformResult(List<MetricResult> result) {
+		
+		List<List<String>> rows = super.transformResult(result);
+		for (List<String> row : rows) {
+			row.set(0, "java - " + row.get(0));
+		}
+		return rows;
+	}
+	
 	
 	
 	@Override
