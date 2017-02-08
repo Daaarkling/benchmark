@@ -38,7 +38,7 @@ class RunCommand extends Command
 			->addOption('repetitions', 'r', InputOption::VALUE_REQUIRED, 'Set number of repetitions', Config::REPETITIONS_DEFAULT)
 			->addOption('output', 'o', InputOption::VALUE_REQUIRED, 'Set output. You can choose from several choices: ' . implode(', ', self::OUTPUTS) . '.', 'console')
 			->addOption('format', 'f', InputOption::VALUE_REQUIRED, 'Run benchmark for specific format only.')
-			->addOption('out_dir', 'd', InputOption::VALUE_REQUIRED, 'Output directory.');
+			->addOption('out-dir', 'd', InputOption::VALUE_REQUIRED, 'Output directory.');
 	}
 
 
@@ -83,8 +83,8 @@ class RunCommand extends Command
 
 		// output dir
 		$outputDir = __DIR__ . '/../../output';
-		if (($outputOption == self::OUTPUT_CSV || $outputOption == self::OUTPUT_FILE) && $input->getOption('out_dir') !== NULL) {
-			$outputDir = $input->getOption('out_dir');
+		if (($outputOption == self::OUTPUT_CSV || $outputOption == self::OUTPUT_FILE) && $input->getOption('out-dir') !== NULL) {
+			$outputDir = $input->getOption('out-dir');
 		}
 
 		$config = new Config($configNode, $testData, $repetitions, $format);
