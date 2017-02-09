@@ -13,6 +13,7 @@ public class MetricClassLoader {
 	
 	 public List<IMetric> loadMetricClasses() {
 
+		Reflections.log = null;
 		Reflections reflections = new Reflections("benchmark.java.metrics.");
 		Set<Class<? extends IMetric>> classes = reflections.getSubTypesOf(IMetric.class);
 		List<IMetric> objects = new ArrayList<>();
