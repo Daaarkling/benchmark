@@ -1,34 +1,21 @@
 # ------------------
 # Init variables
 # ------------------
-outputOptions=("csv" "file" "console")
-output=${outputOptions[0]}
 formatOptions=("native" "json" "xml" "protobuf" "msgpack" "avro")
 format=
 repetitions=100
 outputDir="./"
 testDataOptions=("small" "big")
 testData=$(readlink -f "./testdata/test_data_${testDataOptions[0]}.json")
-
+combined=
+serializeTemp=
+deserializeTemp=
+sizeTemp=
 
 
 # ------------------
 # Validation
 # ------------------
-function setOutput () {
-	optionsString=
-	for i in ${outputOptions[@]}
-	do
-		if [ "$i" = "$1" ]
-		then
-			output=$1
-			return	
-		fi
-		optionsString="$optionsString $i"
-	done
-	error "Output must be one of these options: $optionsString"
-}
-
 function setOutputDir () {
 	if [ -d "$1" ] && [ -w "$1" ]
 	then
@@ -101,9 +88,6 @@ while [ "$1" != "" ]; do
 		-r | --repetitions )           	shift
 						setRepetitions $1
                                 		;;
-		-o | --output )  		shift  
-						setOutput $1
-	  		                      	;;
 		-od | --out_dir )  		shift  
 						setOutputDir $1
 		                        	;;
@@ -124,65 +108,121 @@ done
 # Run benchmarks
 # ------------------
 function runBenchmarks () {
+	
 	if [ "$format" != "" ]
 	then
-		php ./benchmark-php/init.php b:r -r "$repetitions" -o "$output" -d "$outputDir" -f "$format" -t "$testData" > /dev/null
-		java -jar benchmark-java/target/benchmark-java-1.0-jar-with-dependencies.jar -r "$repetitions" -o "$output" -d "$outputDir" -f "$format" -t "$testData" > /dev/null
-		node ./benchmark-nodejs/init.js -r "$repetitions" -o "$output" -d "$outputDir" -f "$format" -t "$testData" > /dev/null
+		php ./benchmark-php/init.php b:r -o csv -r "$repetitions" -d "$outputDir" -f "$format" -t "$testData" > /dev/null
+		java -jar benchmark-java/target/benchmark-java-1.0-jar-with-dependencies.jar -o csv -r "$repetitions" -d "$outputDir" -f "$format" -t "$testData" > /dev/null
+		node ./benchmark-nodejs/init.js -o csv -r "$repetitions" -d "$outputDir" -f "$format" -t "$testData" > /dev/null
 	else
-		php ./benchmark-php/init.php b:r -r "$repetitions" -o "$output" -d "$outputDir" -t "$testData" > /dev/null
-		java -jar benchmark-java/target/benchmark-java-1.0-jar-with-dependencies.jar -r "$repetitions" -o "$output" -d "$outputDir" -t "$testData" > /dev/null
-		node ./benchmark-nodejs/init.js -r "$repetitions" -o "$output" -d "$outputDir" -t "$testData" > /dev/null
+		php ./benchmark-php/init.php b:r -o csv -r "$repetitions" -d "$outputDir" -t "$testData" > /dev/null
+		java -jar benchmark-java/target/benchmark-java-1.0-jar-with-dependencies.jar -o csv -r "$repetitions" -d "$outputDir" -t "$testData" > /dev/null
+		node ./benchmark-nodejs/init.js -o csv -r "$repetitions" -d "$outputDir" -t "$testData" > /dev/null
 	fi
 }
 
+# ---------------------------------
+# Create combined file & temp files
+# ---------------------------------
+function preprocessOutput () {
+	
+	phpCsv="${outDir}php-benchmark-output.csv"
+	javaCsv="${outDir}java-benchmark-output.csv"
+	nodeCsv="${outDir}nodejs-benchmark-output.csv"
+	
+	if [ -f "$outDir$phpCsv" ] && [ -r "$outDir$phpCsv" ] && [ -f "$outDir$javaCsv" ] && [ -r "$outDir$javaCsv" ] && [ -f "$outDir$nodeCsv" ] && [ -r "$outDir$nodeCsv" ]
+	then
+		# create combined file
+		combined="${outputDir}combined-benchmark-output.csv"
+		$(cat php-benchmark-output.csv <(tail -n+2 java-benchmark-output.csv) <(tail -n+2 nodejs-benchmark-output.csv) > $combined)
+		
+		# create temp files
+		serializeTemp=$(mktemp /tmp/benchmark-serialize.csv.XXXXXX)
+		$(awk -F\; '$2 != 0' $combined > $serializeTemp)
+		
+		deserializeTemp=$(mktemp /tmp/benchmark-deserialize.csv.XXXXXX)
+		$(awk -F\; '$3 != 0' $combined > $deserializeTemp)
+		
+		sizeTemp=$(mktemp /tmp/benchmark-size.csv.XXXXXX)
+		$(awk -F\; '$4 != 0' $combined > $sizeTemp)
+	else
+		error "Output files were not found or not redable."
+	fi
+}
+
+# ------------------
+# Delete temp files
+# ------------------
+function deleteTempFiles () {
+
+	$(rm $serializeTemp)
+	$(rm $deserializeTemp)
+	$(rm $sizeTemp)
+}
 
 # ------------------
 # Plot graphs
 # ------------------
 function plot () {
 	
-	phpCsv="php-benchmark-output.csv"
-	javaCsv="java-benchmark-output.csv"
-	nodeCsv="nodejs-benchmark-output.csv"
+	# create combined file & temp files
+	preprocessOutput
 	
-	if [ -f "$outDir$phpCsv" ] && [ -r "$outDir$phpCsv" ] && [ -f "$outDir$javaCsv" ] && [ -r "$outDir$javaCsv" ] && [ -f "$outDir$nodeCsv" ] && [ -r "$outDir$nodeCsv" ]
-	then
-		# create temp file and write into it combined result of benchmarks
-		temp=$(mktemp /tmp/benchmark-combined.csv.XXXXXX)
-		$(cat php-benchmark-output.csv <(tail -n+2 java-benchmark-output.csv) <(tail -n+2 nodejs-benchmark-output.csv) > $temp)
-
-		gnuplot -persist <<-EOFMarker
-			
-			set datafile separator ";"			# csv separator
-			set style fill solid 0.8 border -1	# style of bar chart
-			set boxwidth 0.5 relative			# style of bar chart
-			set ylabel "Time (ms)"				# label of y
-			set grid y							# show horizontal lines
-			set logscale y						# logaritmics scale
-			set xtics right rotate by 45		# rotate names of libs by 45 deg
-			set key autotitle columnhead 		# skip first line in csv	
-			unset key							# no title for data
-			set lmargin 15						# margin so names could fit
-			set title "Serialize"				# title of graph
-			plot "$temp" using 2:xtic(1) with boxes, \
-				 "" using 0:2:2 with labels
-		EOFMarker
+	# output image
+	graphImage="${outputDir}benchmark-output.png"
+	
+	# plot
+	gnuplot -persist <<-EOFMarker
+		set terminal png font arial 12 size 1920,2800		# font size, size of image
+		set output "$graphImage"								# name of output image
+		set multiplot layout 3, 1							# 3 rows, 1 col
 		
-		$(rm $temp)		# remove temp file
-	fi
+		set datafile separator ";"							# csv separator
+		set style fill solid 0.8 border -1					# style of bar chart
+		set boxwidth 0.5 relative							# style of bar chart
+		set grid y											# show horizontal lines
+		set logscale y										# logaritmics scale
+		set xtics right rotate by 45						# rotate names of libs by 45 deg
+		set key autotitle columnhead 						# skip first line in csv	
+		unset key											# no title for data
+		set lmargin 15										# margin so names could fit
+		
+		set ylabel "Time (ms)"								# label of y
+		unset key
+		set title "Serialize"								# title of graph
+		unset key
+		plot "$serializeTemp" using 2:xtic(1) with boxes, \
+			 "" using 0:2:(sprintf("%.1f",\$2)) with labels center offset 0,0.5 notitle
+		
+		set ylabel "Time (ms)"
+		unset key
+		set title "Deserialize"
+		unset key
+		plot "$deserializeTemp" using 3:xtic(1) with boxes, \
+			 "" using 0:3:(sprintf("%.1f",\$3)) with labels center offset 0,0.5 notitle
+			
+		set ylabel "Size (kB)"
+		unset key
+		set title "Size of serialized data"
+		unset key
+		plot "$sizeTemp" using 4:xtic(1) with boxes, \
+			 "" using 0:4:(sprintf("%.1f",\$4)) with labels center offset 0,0.5 notitle
+	EOFMarker
+	
+	# open image in the user's preferred app
+	xdg-open $graphImage
+	
+	# just delete temp files
+	deleteTempFiles
 }
 
-echo "$output"
-echo "$outputDir"
-echo "$repetitions"
-echo "$format"
-echo "$testData"
 
-
+# let's do it
 #runBenchmarks
 plot
-echo "Benchmark run successfully!"
 
+echo ""
+echo "Benchmark run successfully!"
+echo ""
 
 exit 0
