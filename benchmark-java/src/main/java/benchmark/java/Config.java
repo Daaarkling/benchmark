@@ -53,7 +53,7 @@ public class Config {
 	
 	private List<IMetric> metrics;
 	private final File testData;
-	private int repetitions;
+	private final int repetitions;
 	private final Format format;
 
 	private Config(Builder builder) {
@@ -71,8 +71,8 @@ public class Config {
 			//metrics = metrics.stream().filter((item) -> item.getInfo().getFormat().equals(format)).collect(Collectors.toList());
 			metrics.removeIf((item) -> !item.getInfo().getFormat().equals(format));
 		}
-		//metrics.removeIf((item) -> !item.getInfo().getName().equals("dsl-json") && !item.getInfo().getName().equals("JacksonAfterburner"));
-		//metrics.removeIf((item) -> !item.getInfo().getName().equals("JacksonAfterburner"));
+		//metrics.removeIf((item) -> !item.getInfo().getName().equals("Jackson Custom") && !item.getInfo().getName().equals("Jackson"));
+		//metrics.removeIf((item) -> !item.getInfo().getName().equals("Jackson Custom"));
 	}
 
 	public List<IMetric> getMetrics() {
@@ -86,7 +86,7 @@ public class Config {
 	public int getRepetitions() {
 		return repetitions;
 	}
-
+	
 
 	public static class Builder {
 		
