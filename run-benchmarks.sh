@@ -218,7 +218,7 @@ function plot () {
 
 
 # let's do it
-#runBenchmarks
+runBenchmarks
 plot
 
 echo ""
