@@ -19,7 +19,7 @@ cli.option("-o, --output <s>", "Handle output, you can choose from several choic
 // create config with default values
 var config = {
 	testData: null,
-	repetitions: 1000,
+	repetitions: 100,
 	output: "console",
 	outDir: "./",
 	format: ""
