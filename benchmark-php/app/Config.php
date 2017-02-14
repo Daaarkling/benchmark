@@ -4,22 +4,26 @@
 namespace Benchmark;
 
 
+use Benchmark\Metrics\IMetric;
+use Benchmark\Utils\ClassLoader;
+
 class Config
 {
-	const FORMATS = ['native', 'json', 'xml', 'avro', 'msgpack', 'protobuf'];
-	const REPETITIONS_DEFAULT = 1000;
+	const FORMAT_AVRO = 'avro';
+	const FORMAT_JSON = 'json';
+	const FORMAT_XML = 'xml';
+	const FORMAT_MSGPACK = 'msgpack';
+	const FORMAT_PROTOBUF = 'protobuf';
+	const FORMAT_NATIVE = 'native';
+	const FORMATS = [self::FORMAT_NATIVE, self::FORMAT_JSON, self::FORMAT_XML, self::FORMAT_AVRO, self::FORMAT_MSGPACK, self::FORMAT_PROTOBUF];
+
+	const REPETITIONS_DEFAULT = 100;
 
 	/** @var string */
-	public static $configFile = __DIR__ . '/../config/config.json';
+	public static $testDataFile = __DIR__ . '/../testdata/test_data_small.json';
 
-	/** @var string */
-	public static $schemaFile = __DIR__ . '/../config/schema.json';
-
-	/** @var string */
-	public static $testDataFile = __DIR__ . '/../config/test_data_small.json';
-
-	/** @var \stdClass */
-	private $configNode;
+	/** @var IMetric[] */
+	private $metrics;
 
 	/** @var string */
 	private $testData;
@@ -32,42 +36,45 @@ class Config
 
 	/**
 	 * Config constructor.
-	 * @param \stdClass $configNode
 	 * @param string $testData
 	 * @param int $repetitions
 	 * @param string $format
 	 */
-	public function __construct($configNode, $testData, $repetitions = self::REPETITIONS_DEFAULT, $format = NULL)
+	public function __construct($testData, $repetitions = self::REPETITIONS_DEFAULT, $format = NULL)
 	{
-		$this->configNode = $configNode;
 		$this->testData = $testData;
 		$this->repetitions = $repetitions;
 		$this->format = $format;
+		$this->findMetrics();
 	}
 
-	/**
-	 * @return \stdClass
-	 */
-	public function getConfigNode()
-	{
-		if ($this->format !== NULL) {
-			foreach ($this->configNode as $formatName => $libs) {
-				if ($formatName === $this->format) {
-					$stdClass = new \stdClass();
-					$stdClass->$formatName = $libs;
-					return $stdClass;
-				}
-			}
+
+
+	private function findMetrics() {
+
+		$this->metrics = ClassLoader::loadClasses();
+		if ($this->format) {
+			$this->metrics = array_filter($this->metrics, function ($metric) {
+				return $metric->getInfo()->getFormat() == $this->format;
+			});
 		}
-		return $this->configNode;
+	}
+
+
+	/**
+	 * @return IMetric[]
+	 */
+	public function getMetrics()
+	{
+		return $this->metrics;
 	}
 
 	/**
-	 * @param \stdClass $configNode
+	 * @param IMetric[] $metrics
 	 */
-	public function setConfigNode($configNode)
+	public function setMetrics($metrics)
 	{
-		$this->configNode = $configNode;
+		$this->metrics = $metrics;
 	}
 
 	/**

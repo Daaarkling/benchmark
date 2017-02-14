@@ -10,6 +10,11 @@ interface IMetric
 	const OUTER_REPETITION = 10;
 
 	/**
+	 * @return Info
+	 */
+	public function getInfo();
+
+	/**
 	 * @param mixed $data
 	 * @param string $dataFile
 	 * @param int $repetitions

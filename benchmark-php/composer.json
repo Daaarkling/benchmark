@@ -12,7 +12,6 @@
         "nette/utils": "^v2.4",
         "symfony/console": "^3.1",
         "league/csv": "^8.1",
-        "justinrainbow/json-schema": "4.0.1 as 1.6.1",
         "openlss/lib-array2xml": "0.5.0",
         "spatie/array-to-xml": "2.2",
         "fillup/array2xml": "0.5.1",

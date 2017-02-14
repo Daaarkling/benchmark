@@ -3,9 +3,11 @@
 namespace Benchmark\Metrics\Protobuf;
 
 
+use Benchmark\Config;
 use Benchmark\Converters\AllegroPhpProtobuf\PersonCollection;
 use Benchmark\Converters\AllegroPhpProtobuf\ProtobufConverter;
 use Benchmark\Metrics\AMetric;
+use Benchmark\Metrics\Info;
 
 
 class AllegroPhpProtobuf extends AMetric
@@ -13,6 +15,11 @@ class AllegroPhpProtobuf extends AMetric
 	/** @var  PersonCollection */
 	private $personCollection;
 
+
+	public function getInfo()
+	{
+		return new Info(Config::FORMAT_PROTOBUF, 'serggp/php-protobuf', 'https://github.com/serggp/php-protobuf', '0.10');
+	}
 
 	public function prepareBenchmark()
 	{

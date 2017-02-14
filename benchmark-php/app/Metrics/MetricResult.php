@@ -6,8 +6,8 @@ namespace Benchmark\Metrics;
 
 class MetricResult
 {
-	/** @var string */
-	private $name;
+	/** @var Info */
+	private $info;
 
 	/** @var int */
 	private $size;
@@ -49,21 +49,30 @@ class MetricResult
 		return $sum / $count;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getName()
-	{
-		return $this->name;
+	public function getFullName() {
+
+		if ($this->info) {
+			return $this->info->getFullName();
+		}
+		return '---';
 	}
 
 	/**
-	 * @param string $name
+	 * @return Info
 	 */
-	public function setName($name)
+	public function getInfo()
 	{
-		$this->name = $name;
+		return $this->info;
 	}
+
+	/**
+	 * @param Info $info
+	 */
+	public function setInfo($info)
+	{
+		$this->info = $info;
+	}
+
 
 	/**
 	 * @return int

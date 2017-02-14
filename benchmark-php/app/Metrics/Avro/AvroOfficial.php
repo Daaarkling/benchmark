@@ -9,15 +9,23 @@ use AvroIODatumReader;
 use AvroStringIO;
 use Benchmark\Config;
 use Benchmark\Metrics\IMetric;
+use Benchmark\Metrics\Info;
 use Benchmark\Metrics\MetricResult;
 
 
 class AvroOfficial implements IMetric
 {
 
+	public function getInfo()
+	{
+		return new Info(Config::FORMAT_AVRO, 'apache/avro', 'http://avro.apache.org', '1.8.1');
+	}
+
+
 	public function run($data, $dataFile, $repetitions = Config::REPETITIONS_DEFAULT)
 	{
 		$result = new MetricResult();
+		$result->setInfo($this->getInfo());
 
 		// Serialization
 		// Do it once to warm up.

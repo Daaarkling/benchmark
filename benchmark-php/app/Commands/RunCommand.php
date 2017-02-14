@@ -32,8 +32,7 @@ class RunCommand extends Command
 	protected function configure()
 	{
 		$this->setName('benchmark:run')
-			->setDescription('Run benchmark with given config and test data.')
-			->addOption('config', 'c', InputOption::VALUE_REQUIRED, 'Set config file.')
+			->setDescription('Run benchmark.')
 			->addOption('data', 't', InputOption::VALUE_REQUIRED, 'Set test data.')
 			->addOption('repetitions', 'r', InputOption::VALUE_REQUIRED, 'Set number of repetitions', Config::REPETITIONS_DEFAULT)
 			->addOption('output', 'o', InputOption::VALUE_REQUIRED, 'Set output. You can choose from several choices: ' . implode(', ', self::OUTPUTS) . '.', 'console')
@@ -47,15 +46,6 @@ class RunCommand extends Command
 	{
 		$io = new SymfonyStyle($input, $output);
 
-		// config
-		$configFile = $input->getOption('config');
-		if ($configFile !== NULL && ($configReal = realpath($configFile))) {
-			$configFile = $configReal;
-		} elseif (($configReal = realpath(Config::$configFile))) {
-			$configFile = $configReal;
-		}
-		$configNode = Json::decode(file_get_contents($configFile));
-
 
 		// test data
 		$testData = $input->getOption('data');
@@ -63,23 +53,45 @@ class RunCommand extends Command
 			$testData = $realPath;
 		} elseif (($realPath = realpath(Config::$testDataFile))) {
 			$testData = $realPath;
+		} else {
+			$io->error('Test data file was not found.');
+			exit(1);
 		}
 
 
 		// repetitions
 		$repetitions = $input->getOption('repetitions');
+		if($repetitions !== NULL) {
+			if($repetitions < 1) {
+				$io->error("Repetitions must be whole number greater than zero.");
+				exit(1);
+			}
+		} else {
+			$repetitions = Config::REPETITIONS_DEFAULT;
+		}
 
 
 		// format
 		$format = $input->getOption('format');
+		if ($format !== NULL) {
+			if (!in_array($format, Config::FORMATS)) {
+				$io->error('Format must by one of these options: ' . implode(', ', Config::FORMATS));
+				exit(1);
+			}
+		}
 
 
 		// output
 		$outputOption = $input->getOption('output');
-		if (!in_array($outputOption, self::OUTPUTS)) {
-			$io->error('Output must be one of these options: ' . implode(', ', self::OUTPUTS));
-			return 1;
+		if ($outputOption !== NULL) {
+			if (!in_array($outputOption, self::OUTPUTS)) {
+				$io->error('Output must be one of these options: ' . implode(', ', self::OUTPUTS));
+				return 1;
+			}
+		} else {
+			$outputOption = self::OUTPUT_CONSOLE;
 		}
+
 
 		// output dir
 		$outputDir = __DIR__ . '/../../output';
@@ -87,40 +99,27 @@ class RunCommand extends Command
 			$outputDir = $input->getOption('out-dir');
 		}
 
-		$config = new Config($configNode, $testData, $repetitions, $format);
+		$config = new Config($testData, $repetitions, $format);
 
-		// validation
-		$validator = new ConfigValidator($config);
-		$validator->validate();
 
 		// validation is OK
-		if ($validator->isValid()) {
+		$io->title('Validation succeeded!');
 
-			$io->title('Validation succeeded!');
-
-			if ($outputOption === self::OUTPUT_FILE) {
+		switch ($outputOption) {
+			case self::OUTPUT_FILE:
 				$bufferedOutput = new BufferedOutput();
 				$benchmark = new BenchmarkFileOutput($config, $input, $bufferedOutput, $outputDir);
-			}
-			elseif ($outputOption === self::OUTPUT_CSV) {
+				break;
+			case self::OUTPUT_CSV:
 				$benchmark = new BenchmarkCsvOutput($config, $outputDir);
-			}
-			else {
+				break;
+			default:
 				$benchmark = new BenchmarkConsoleOutput($config, $input, $output);
-			}
-
-			$benchmark->run();
-
-			$io->title('Benchmark processed successfully!');
-			return 0;
-
-		} else {
-
-			// errors
-			foreach ($validator->getErrors() as $error) {
-				$io->error(sprintf("'%s' %s", $error['property'], $error['message']));
-			}
-			return 1;
 		}
+
+		$benchmark->run();
+
+		$io->title('Benchmark processed successfully!');
+		return 0;
 	}
 }

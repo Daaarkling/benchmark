@@ -25,6 +25,7 @@ abstract class AMetric implements IMetric
 		$this->data = $data;
 		$this->dataFile = $dataFile;
 		$result = new MetricResult();
+		$result->setInfo($this->getInfo());
 		$this->prepareBenchmark();
 		$data = $this->prepareDataForSerialize();
 

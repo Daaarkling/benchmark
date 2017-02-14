@@ -3,7 +3,9 @@
 namespace Benchmark\Metrics\Msgpack;
 
 
+use Benchmark\Config;
 use Benchmark\Metrics\AMetric;
+use Benchmark\Metrics\Info;
 use MessagePack\BufferUnpacker;
 use MessagePack\Packer;
 
@@ -15,6 +17,12 @@ class RybakitMsgpack extends AMetric
 
 	/** @var Packer */
 	private $packer;
+
+
+	public function getInfo()
+	{
+		return new Info(Config::FORMAT_MSGPACK, 'rybakit/msgpack', 'https://github.com/rybakit/msgpack.php', '0.2.1');
+	}
 
 
 	public function prepareBenchmark()

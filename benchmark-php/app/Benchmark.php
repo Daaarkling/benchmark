@@ -6,7 +6,8 @@ namespace Benchmark;
 
 use Benchmark\Converters\ArrayConverter;
 use Benchmark\Metrics\IMetric;
-use Benchmark\Utils\ClassHelper;
+use Benchmark\Metrics\MetricResult;
+use Benchmark\Utils\ClassLoader;
 use Benchmark\Utils\Formatters;
 
 abstract class Benchmark
@@ -32,26 +33,17 @@ abstract class Benchmark
 		$dataFile = $this->config->getTestData();
 		$repetitions = $this->config->getRepetitions();
 
-		foreach ($this->config->getConfigNode() as $formatName => $libs){
-			foreach ($libs as $lib){
+		foreach ($this->config->getMetrics() as $metric){
 
-				$className = $lib->class;
-				if (!($class = ClassHelper::instantiateClass($className, IMetric::class))) {
-					continue;
-				}
 
-				// Run metric benchmark
-				$metricResult = $class->run($data, $dataFile, $repetitions);
+			// Run metric benchmark
+			$metricResult = $metric->run($data, $dataFile, $repetitions);
 
-				if($metricResult === NULL){
-					continue;
-				}
-
-				$name = property_exists($lib, 'version') ? $lib->name . ' ' . $lib->version : $lib->name;
-				$metricResult->setName($name);
-
-				$result[$formatName][] = $metricResult;
+			if($metricResult === NULL){
+				continue;
 			}
+
+			$result[] = $metricResult;
 		}
 
 
@@ -62,21 +54,19 @@ abstract class Benchmark
 
 
 	/**
-	 * @param array $result
+	 * @param MetricResult[] $result
 	 * @return array
 	 */
 	protected function transformResult($result)
 	{
 		$rows = [];
-		foreach ($result as $typeName => $libs) {
-			foreach ($libs as $metricResult) {
-				$rows[] = [
-					$typeName . ' - ' . $metricResult->getName(),
-					$metricResult->getSerialize() !== NULL ? round($metricResult->getSerialize() * 1000, 4) : 0,
-					$metricResult->getDeserialize() !== NULL ? round($metricResult->getDeserialize() * 1000, 4) : 0,
-					$metricResult->getSerialize() !== NULL ? round($metricResult->getSize() / 1024, 4) : 0,
-				];
-			}
+		foreach ($result as $metricResult) {
+			$rows[] = [
+				$metricResult->getFullName(),
+				$metricResult->getSerialize() !== NULL ? round($metricResult->getSerialize() * 1000, 4) : 0,
+				$metricResult->getDeserialize() !== NULL ? round($metricResult->getDeserialize() * 1000, 4) : 0,
+				$metricResult->getSerialize() !== NULL ? round($metricResult->getSize() / 1024, 4) : 0,
+			];
 		}
 
 		// sort by name
