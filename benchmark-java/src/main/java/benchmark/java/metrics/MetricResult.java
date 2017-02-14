@@ -1,5 +1,6 @@
 package benchmark.java.metrics;
 
+import benchmark.java.Config;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,15 @@ public class MetricResult {
 		}
 		return sum / (double) times.size();
 	}
+	
+	public String getFullName() {
+		
+		if(info != null) {
+			return info.getFullName();
+		}
+		return "---";
+	}
+
 	
 	public double getSerializeMean() {		
 		return computeMean(serialize);

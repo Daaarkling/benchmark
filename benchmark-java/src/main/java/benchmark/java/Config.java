@@ -49,7 +49,7 @@ public class Config {
 		}
 	};
 
-	public static String testDataPath = "config/test_data_small.json";
+	public static String testDataPath = "testdata/test_data_small.json";
 	
 	private List<IMetric> metrics;
 	private final File testData;
@@ -91,7 +91,7 @@ public class Config {
 	public static class Builder {
 		
 		private final File testData;
-		private int repetitions = 1000;
+		private int repetitions = 100;
 		private Format format;
 
 		public Builder(File testData) {

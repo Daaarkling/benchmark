@@ -57,7 +57,7 @@ public abstract class Benchmark {
 			double deserializeMean = metricResult.getDeserializeMean();
 			double size = metricResult.getSize();
 			
-			row.add(metricResult.getInfo().getFullName());
+			row.add(metricResult.getFullName());
 			row.add(serializeMean != 0 ? new BigDecimal(serializeMean).divide(new BigDecimal("1000000"), 4, RoundingMode.FLOOR).toString() : "0");
 			row.add(deserializeMean != 0 ? new BigDecimal(deserializeMean).divide(new BigDecimal("1000000"), 4, RoundingMode.FLOOR).toString() : "0");
 			row.add(size != 0 ? new BigDecimal(size).divide(new BigDecimal("1024"), 4, RoundingMode.FLOOR).toString() : "0");	
