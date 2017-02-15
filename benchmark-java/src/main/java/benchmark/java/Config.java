@@ -68,11 +68,8 @@ public class Config {
 		MetricClassLoader classLoader = new MetricClassLoader();
 		metrics = classLoader.loadMetricClasses();
 		if (format != null) {
-			//metrics = metrics.stream().filter((item) -> item.getInfo().getFormat().equals(format)).collect(Collectors.toList());
 			metrics.removeIf((item) -> !item.getInfo().getFormat().equals(format));
 		}
-		//metrics.removeIf((item) -> !item.getInfo().getName().equals("Jackson Custom") && !item.getInfo().getName().equals("Jackson"));
-		//metrics.removeIf((item) -> !item.getInfo().getName().equals("Jackson Custom"));
 	}
 
 	public List<IMetric> getMetrics() {

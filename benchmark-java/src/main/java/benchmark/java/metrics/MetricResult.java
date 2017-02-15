@@ -1,6 +1,5 @@
 package benchmark.java.metrics;
 
-import benchmark.java.Config;
 import java.util.ArrayList;
 import java.util.List;
 
