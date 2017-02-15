@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # ------------------
 # Init variables
 # ------------------
@@ -71,7 +73,9 @@ function setRepetitions () {
 # Print
 # ------------------
 function error () {
-	echo "Error: $1"
+	echo ""
+	echo "	Error: $1"
+	echo ""
 	exit 1
 }
 
@@ -85,17 +89,17 @@ function printHelp () {
 # ------------------
 while [ "$1" != "" ]; do
 	case $1 in
-		-r | --repetitions )           	shift
-						setRepetitions $1
-                                		;;
-		-od | --out_dir )  		shift  
-						setOutputDir $1
+		-r | --repetitions )		shift
+									setRepetitions $1
+									;;
+		-d | --out-dir )  			shift
+									setOutputDir $1
 		                        	;;
 		-f | --format )  			shift  
-						setFormat $1
+									setFormat $1
 		                        	;;
-		-d | --data )  			shift  
-						setData $1
+		-t | --data )  				shift
+									setData $1
 		                        	;;
 		-h | --help )           	printHelp	
 		                        	;;
