@@ -62,9 +62,9 @@ public class Info {
 
 	public String getFullName() {
 		if (version == null || "".equals(version)){
-			return format + " - " + name;
+			return "java - " + format + " - " + name;
 		}
-		return format + " - " + name + " " + version;
+		return "java - " + format + " - " + name + " " + version;
 	}
 	
 	

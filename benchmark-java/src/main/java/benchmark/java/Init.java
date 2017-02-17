@@ -1,5 +1,8 @@
 package benchmark.java;
 
+import benchmark.java.output.ConsoleOutput;
+import benchmark.java.output.CsvOutput;
+import benchmark.java.output.IOutputHandler;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -15,14 +18,7 @@ public class Init {
 	
 	private static final String OUTPUT_CONSOLE = "console";
 	private static final String OUTPUT_CSV = "csv";
-	private static final String OUTPUT_FILE = "file";
-	
-	private static final String MODE_OUTER = "outer";
-	private static final String MODE_INNER = "inner";
-
-	private String[] outputs = {OUTPUT_CONSOLE, OUTPUT_CSV, OUTPUT_FILE};
-	
-	
+	private String[] outputs = {OUTPUT_CONSOLE, OUTPUT_CSV};
 	
 
 	public Init(String[] args) {
@@ -45,7 +41,7 @@ public class Init {
 			}
 			
 			String outputDir = ".";
-			if ((output.equals(OUTPUT_CSV) || output.equals(OUTPUT_FILE)) && cmd.hasOption("d")) {
+			if (output.equals(OUTPUT_CSV) && cmd.hasOption("d")) {
 				outputDir = cmd.getOptionValue("d");
 				File outputDirFile = new File(outputDir);
 				if (!outputDirFile.isDirectory() || !outputDirFile.canWrite()) {
@@ -95,20 +91,16 @@ public class Init {
 					.format(format)
 					.build();
 
-			System.out.println("Validation succeeded!");
 			
-			Benchmark benchmark;
+			IOutputHandler outputHandler;
 			switch (output) {
 				case OUTPUT_CSV:
-					benchmark = new BenchmarkCsvOutput(config, outputDir);
-					break;
-				case OUTPUT_FILE:
-					benchmark = new BenchmarkFileOutput(config, outputDir);
+					outputHandler = new CsvOutput(outputDir);
 					break;
 				default:
-					benchmark = new BenchmarkConsoleOutput(config);
-					break;
+					outputHandler = new ConsoleOutput();
 			}
+			Benchmark benchmark = new Benchmark(config, outputHandler);
 			benchmark.run();
 
 			System.out.println("Benchmark processed successfully!");

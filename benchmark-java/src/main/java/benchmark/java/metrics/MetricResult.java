@@ -32,6 +32,15 @@ public class MetricResult {
 		return sum / (double) times.size();
 	}
 	
+	public boolean isSerializeEmpty() {
+		return serialize.isEmpty();
+	}
+	
+	public boolean isDeserializeEmpty() {
+		return deserialize.isEmpty();
+	}
+	
+	
 	public String getFullName() {
 		
 		if(info != null) {

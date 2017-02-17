@@ -3,24 +3,32 @@ package benchmark.java;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import benchmark.java.converters.IDataConverter;
 import benchmark.java.converters.PojoConverter;
 import benchmark.java.metrics.IMetric;
 import benchmark.java.metrics.MetricResult;
+import benchmark.java.output.IOutputHandler;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TimeZone;
 
 
-public abstract class Benchmark {
+public class Benchmark {
 	
 	protected Config config;
+	private IOutputHandler outputHandler;
 
 	
-	public Benchmark(Config config) {
+	public Benchmark(Config config, IOutputHandler outputHandler) {
 		
 		this.config = config;
+		this.outputHandler = outputHandler;
 	}
 	
 	/**
@@ -31,7 +39,6 @@ public abstract class Benchmark {
 		Object data = prepareData();
 		List<MetricResult> result = new ArrayList<>();
 		
-
 		for (IMetric metric : config.getMetrics()) {
 			// run metric benchmark
 			MetricResult metricResult = metric.run(data, config.getTestData(), config.getRepetitions());
@@ -39,35 +46,27 @@ public abstract class Benchmark {
 				result.add(metricResult);
 			}
 		}
-		result.sort((p1, p2) -> p1.getInfo().getFullName().compareTo(p2.getInfo().getFullName()));
 		
-		List<List<String>> rows = transformResult(result);
-		List<String> headers = Arrays.asList(new String[]{"Name", "Serialize (ms)", "Deserialize (ms)", "Size (kB)"});
-		handleResult(headers, rows);
+		outputHandler.handleBenchmarkResult(result);
+		outputHandler.printBenchmarkInfo(getInfo());
 	}
 	
-	protected List<List<String>> transformResult(List<MetricResult> result) {
+	public Map<String, String> getInfo() {
 		
-		List<List<String>> rows = new ArrayList<>();
+		TimeZone tz = TimeZone.getTimeZone("UTC");
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+		df.setTimeZone(tz);
+		String nowAsISO = df.format(new Date());
+		
+		Map<String, String> info = new LinkedHashMap<>();
+		info.put("JAVA version", System.getProperty("java.version"));
+		info.put("Test data size (raw)", new BigDecimal(config.getTestData().length()).divide(new BigDecimal("1024"), 2, RoundingMode.FLOOR).toString() + " (kB)");
+		info.put("Outer repetition", String.valueOf(IMetric.OUTER_REPETITION));
+		info.put("Inner repetition", String.valueOf(config.getRepetitions()));
+		info.put("Date", nowAsISO);
+		return info;
+	}
 
-		for (MetricResult metricResult : result) {
-			List<String> row = new ArrayList<>();
-			
-			double serializeMean = metricResult.getSerializeMean();
-			double deserializeMean = metricResult.getDeserializeMean();
-			double size = metricResult.getSize();
-			
-			row.add(metricResult.getFullName());
-			row.add(serializeMean != 0 ? new BigDecimal(serializeMean).divide(new BigDecimal("1000000"), 4, RoundingMode.FLOOR).toString() : "0");
-			row.add(deserializeMean != 0 ? new BigDecimal(deserializeMean).divide(new BigDecimal("1000000"), 4, RoundingMode.FLOOR).toString() : "0");
-			row.add(size != 0 ? new BigDecimal(size).divide(new BigDecimal("1024"), 4, RoundingMode.FLOOR).toString() : "0");	
-			rows.add(row);
-		}
-		return rows;
-	}
-	
-	protected abstract void handleResult(List<String> headers, List<List<String>> rows);
-	
 	
 	protected Object prepareData() {
 		File testData = config.getTestData();
@@ -81,5 +80,13 @@ public abstract class Benchmark {
 
 	public void setConfig(Config config) {
 		this.config = config;
+	}
+
+	public IOutputHandler getOutputHandler() {
+		return outputHandler;
+	}
+
+	public void setOutputHandler(IOutputHandler outputHandler) {
+		this.outputHandler = outputHandler;
 	}
 }
