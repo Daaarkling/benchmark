@@ -58,6 +58,23 @@ class MetricResult
 	}
 
 	/**
+	 * @return bool
+	 */
+	public function isSerializeEmpty() {
+
+		return empty($this->serialize);
+	}
+
+
+	/**
+	 * @return bool
+	 */
+	public function isDeserializeEmpty() {
+
+		return empty($this->deserialize);
+	}
+
+	/**
 	 * @return Info
 	 */
 	public function getInfo()

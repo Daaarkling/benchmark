@@ -46,9 +46,9 @@ class Info
 	public function getFullName()
 	{
 		if (!$this->version){
-			return $this->format . ' - ' . $this->name;
+			return 'php - ' . $this->format . ' - ' . $this->name;
 		}
-		return $this->format . ' - ' . $this->name . ' ' . $this->version;
+		return 'php - ' . $this->format . ' - ' . $this->name . ' ' . $this->version;
 	}
 
 	/**

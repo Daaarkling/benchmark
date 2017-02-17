@@ -7,7 +7,7 @@ use Benchmark\Config;
 
 interface IMetric
 {
-	const OUTER_REPETITION = 10;
+	const OUTER_REPETITION = 30;
 
 	/**
 	 * @return Info

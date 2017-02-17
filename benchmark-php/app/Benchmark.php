@@ -6,20 +6,21 @@ namespace Benchmark;
 
 use Benchmark\Converters\ArrayConverter;
 use Benchmark\Metrics\IMetric;
-use Benchmark\Metrics\MetricResult;
-use Benchmark\Utils\ClassLoader;
-use Benchmark\Utils\Formatters;
+use Benchmark\Output\IOutputHandler;
 
-abstract class Benchmark
+class Benchmark
 {
 	/** @var Config */
 	protected $config;
 
+	/** @var IOutputHandler */
+	private $outputHandler;
 
 
-	public function __construct(Config $config)
+	public function __construct(Config $config, IOutputHandler $outputHandler)
 	{
 		$this->config = $config;
+		$this->outputHandler = $outputHandler;
 	}
 
 
@@ -47,42 +48,24 @@ abstract class Benchmark
 		}
 
 
-		$rows = $this->transformResult($result);
-		$headers = ["Name", "Serialize (ms)", "Deserialize (ms)", "Size (kB)"];
-		$this->handleResult($headers, $rows);
+		$this->outputHandler->handleBenchmarkResult($result);
+		$this->outputHandler->printBenchmarkInfo($this->getInfo());
 	}
 
 
 	/**
-	 * @param MetricResult[] $result
 	 * @return array
 	 */
-	protected function transformResult($result)
-	{
-		$rows = [];
-		foreach ($result as $metricResult) {
-			$rows[] = [
-				$metricResult->getFullName(),
-				$metricResult->getSerialize() !== NULL ? round($metricResult->getSerialize() * 1000, 4) : 0,
-				$metricResult->getDeserialize() !== NULL ? round($metricResult->getDeserialize() * 1000, 4) : 0,
-				$metricResult->getSerialize() !== NULL ? round($metricResult->getSize() / 1024, 4) : 0,
-			];
-		}
+	public function getInfo() {
 
-		// sort by name
-		uasort($rows, function ($a, $b) {
-			return $a[0] > $b[0];
-		});
-
-		return $rows;
+		return [
+			'PHP version' => phpversion(),
+			'Test data size (raw)' => round(filesize($this->config->getTestData()) / 1024, 2) . ' kB',
+			'Outer repetition' => IMetric::OUTER_REPETITION,
+			'Inner repetition' => $this->config->getRepetitions(),
+			'Date' => (new \DateTime())->format('c'),
+		];
 	}
-
-
-	/**
-	 * @param string[] $headers
-	 * @param string[] $rows
-	 */
-	protected abstract function handleResult($headers, $rows);
 
 
 	/**

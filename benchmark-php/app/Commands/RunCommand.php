@@ -3,29 +3,21 @@
 namespace Benchmark\Commands;
 
 
-use Benchmark\BenchmarkConsoleOutput;
-use Benchmark\BenchmarkCsvOutput;
-use Benchmark\BenchmarkDumpOutput;
-use Benchmark\BenchmarkFileOutput;
+use Benchmark\Benchmark;
 use Benchmark\Config;
-use Benchmark\Utils\ConfigValidator;
-use Nette\Utils\Json;
+use Benchmark\ConsoleOutput;
+use Benchmark\CsvOutput;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 class RunCommand extends Command
 {
-	const OUTPUT_FILE = 'file';
 	const OUTPUT_CSV = 'csv';
 	const OUTPUT_CONSOLE = 'console';
-	const OUTPUTS = [self::OUTPUT_FILE, self::OUTPUT_CSV, self::OUTPUT_CONSOLE];
-
-
-
+	const OUTPUTS = [self::OUTPUT_CSV, self::OUTPUT_CONSOLE];
 
 
 
@@ -95,28 +87,21 @@ class RunCommand extends Command
 
 		// output dir
 		$outputDir = __DIR__ . '/../../output';
-		if (($outputOption == self::OUTPUT_CSV || $outputOption == self::OUTPUT_FILE) && $input->getOption('out-dir') !== NULL) {
+		if ($outputOption == self::OUTPUT_CSV && $input->getOption('out-dir') !== NULL) {
 			$outputDir = $input->getOption('out-dir');
 		}
 
 		$config = new Config($testData, $repetitions, $format);
 
 
-		// validation is OK
-		$io->title('Validation succeeded!');
-
 		switch ($outputOption) {
-			case self::OUTPUT_FILE:
-				$bufferedOutput = new BufferedOutput();
-				$benchmark = new BenchmarkFileOutput($config, $input, $bufferedOutput, $outputDir);
-				break;
 			case self::OUTPUT_CSV:
-				$benchmark = new BenchmarkCsvOutput($config, $outputDir);
+				$outputHandler = new CsvOutput($outputDir);
 				break;
 			default:
-				$benchmark = new BenchmarkConsoleOutput($config, $input, $output);
+				$outputHandler = new ConsoleOutput($input, $output);
 		}
-
+		$benchmark = new Benchmark($config, $outputHandler);
 		$benchmark->run();
 
 		$io->title('Benchmark processed successfully!');
