@@ -26,7 +26,14 @@ exports.run = function(config) {
 		result.push(metric.run(config.testData, config.repetitions));
 	});
 	
+	var info = {
+		version: process.version,
+		size: (config.testDataSize / 1024).toFixed(2) + " (kB)",
+		outer: global.OUTER_REPETITION,
+		inner: config.repetitions,
+		date: new Date().toISOString()
+	};
 	
 	// hande output (run function by its string name)
-	outputs[config.output](result, config.outDir);
+	outputs[config.output](result, info, config.outDir);
 }

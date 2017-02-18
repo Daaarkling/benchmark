@@ -4,8 +4,9 @@ var	cli = require("commander");
 var fs = require("fs");
 
 var	formats = ["json", "xml", "msgpack", "protobuf", "avro"];
-var	outputs = ["console", "csv", "file"];
+var	outputs = ["console", "csv"];
 
+global.OUTER_REPETITION = 30;
 
 // configurate command options
 cli.option("-o, --output <s>", "Handle output, you can choose from several choices: " + outputs.join(", "))
@@ -19,6 +20,7 @@ cli.option("-o, --output <s>", "Handle output, you can choose from several choic
 // create config with default values
 var config = {
 	testData: null,
+	testDataSize: 0,
 	repetitions: 100,
 	output: "console",
 	outDir: "./",
@@ -27,21 +29,27 @@ var config = {
 
 // set config values from cli
 if(cli.testData) {
-	if (fs.lstatSync(cli.testData).isFile()) {
+	testData(cli.testData);
+} else {
+	testData("./testdata/test_data_small.json");
+}
+
+function testData(filePath) {
+	var stats = fs.lstatSync(filePath);
+	if (stats.isFile()) {
 		try {
-			fs.accessSync(cli.testData, fs.constants.R_OK);
-			config.testData = require(path.resolve(cli.testData));
+			fs.accessSync(filePath, fs.constants.R_OK);
+			config.testData = require(path.resolve(filePath));
+			config.testDataSize = stats.size;
 		} catch (err) {
-			console.error("\n  error: Test data file is nor redeable.\n");
+			console.error("\n  error: Test data file is not redeable.\n");
 			process.exit(1);
 		}
 	} else {
 		console.error("\n  error: Test data must be file.\n");
 		process.exit(1);
 	}
-} else {
-	config.testData = require("./testdata/test_data_small.json");
-}
+} 
 
 // set config values from cli
 
@@ -72,7 +80,7 @@ if(cli.output) {
 	}
 }
 
-if((cli.output === "csv" || cli.output === "file") && cli.outDir) {
+if(cli.output === "csv" && cli.outDir) {
 	if (fs.lstatSync(cli.outDir).isDirectory()) {
 		try {
 			fs.accessSync(cli.outDir, fs.constants.W_OK);
@@ -91,4 +99,6 @@ if((cli.output === "csv" || cli.output === "file") && cli.outDir) {
 
 // run
 benchmark.run(config);
+
+console.log("\n Benchmark processed successfully!\n ");
 

@@ -7,12 +7,13 @@ var metric = function(format, name, version, url, serialize, deserialize) {
 	this.deserialize = deserialize;
 }
 
+
 metric.prototype.fullName = function() {
 		
 	if(this.version) {
-		return this.format + " - " + this.name + " - " + this.version;
+		return "nodejs - " + this.format + " - " + this.name + " - " + this.version;
 	}
-	return this.format + " - " + this.name;
+	return "nodejs - " + this.format + " - " + this.name;
 };
 
 metric.prototype.run = function(testData, repetitions = 1000) {
@@ -35,7 +36,7 @@ metric.prototype.run = function(testData, repetitions = 1000) {
 		result.size = serializedData.length;
 
 		// run
-		for (var y = 0; y < 10; y++){
+		for (var j = 0; j < global.OUTER_REPETITION; j++){
 			start = process.hrtime();
 			for (var i = 0; i < repetitions; i++) {
 				this.serializeImpl(testData);
@@ -59,7 +60,7 @@ metric.prototype.run = function(testData, repetitions = 1000) {
 		this.deserializeImpl(serializedData);
 
 		// run
-		for (var y = 0; y < 10; y++){
+		for (var j = 0; j < global.OUTER_REPETITION; j++){
 			start = process.hrtime();
 			for (var i = 0; i < repetitions; i++) {
 				this.deserializeImpl(serializedData);
