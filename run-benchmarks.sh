@@ -9,10 +9,12 @@ repetitions=100
 outputDir="./"
 testDataOptions=("small" "big")
 testData=$(readlink -f "./testdata/test_data_${testDataOptions[0]}.json")
-combined=
-serializeTemp=
-deserializeTemp=
+summarizeSerializeTemp=
+summarizeDeserializeTemp=
 sizeTemp=
+combinedSerialize=
+combinedDeserialize=
+
 
 
 # ------------------
@@ -125,27 +127,27 @@ function runBenchmarks () {
 	fi
 }
 
-# ---------------------------------
-# Create combined file & temp files
-# ---------------------------------
-function preprocessOutput () {
+# ----------------------------------------------
+# Create combined file & temp files for box plot
+# ----------------------------------------------
+function preprocessBarOutput () {
 	
-	phpCsv="${outDir}php-benchmark-output.csv"
-	javaCsv="${outDir}java-benchmark-output.csv"
-	nodeCsv="${outDir}nodejs-benchmark-output.csv"
+	phpCsv="${outDir}php-summarize.csv"
+	javaCsv="${outDir}java-summarize.csv"
+	nodeCsv="${outDir}nodejs-summarize.csv"
 	
-	if [ -f "$outDir$phpCsv" ] && [ -r "$outDir$phpCsv" ] && [ -f "$outDir$javaCsv" ] && [ -r "$outDir$javaCsv" ] && [ -f "$outDir$nodeCsv" ] && [ -r "$outDir$nodeCsv" ]
+	if [ -r "$outDir$phpCsv" ] && [ -r "$outDir$javaCsv" ] && [ -r "$outDir$nodeCsv" ]
 	then
 		# create combined file
-		combined="${outputDir}combined-benchmark-output.csv"
-		$(cat php-benchmark-output.csv <(tail -n+2 java-benchmark-output.csv) <(tail -n+2 nodejs-benchmark-output.csv) > $combined)
+		combined="${outputDir}combined-summarize.csv"
+		$(cat $phpCsv <(tail -n+2 $javaCsv) <(tail -n+2 $nodeCsv) > $combined)
 		
 		# create temp files
-		serializeTemp=$(mktemp /tmp/benchmark-serialize.csv.XXXXXX)
-		$(awk -F\; '$2 != 0' $combined > $serializeTemp)
+		summarizeSerializeTemp=$(mktemp /tmp/benchmark-serialize.csv.XXXXXX)
+		$(awk -F\; '$2 != 0' $combined > $summarizeSerializeTemp)
 		
-		deserializeTemp=$(mktemp /tmp/benchmark-deserialize.csv.XXXXXX)
-		$(awk -F\; '$3 != 0' $combined > $deserializeTemp)
+		summarizeDeserializeTemp=$(mktemp /tmp/benchmark-deserialize.csv.XXXXXX)
+		$(awk -F\; '$3 != 0' $combined > $summarizeDeserializeTemp)
 		
 		sizeTemp=$(mktemp /tmp/benchmark-size.csv.XXXXXX)
 		$(awk -F\; '$4 != 0' $combined > $sizeTemp)
@@ -154,31 +156,32 @@ function preprocessOutput () {
 	fi
 }
 
+
 # ------------------
 # Delete temp files
 # ------------------
 function deleteTempFiles () {
 
-	$(rm $serializeTemp)
-	$(rm $deserializeTemp)
+	$(rm $summarizeSerializeTemp)
+	$(rm $summarizeDeserializeTemp)
 	$(rm $sizeTemp)
 }
 
 # ------------------
-# Plot graphs
+# Plot bar graphs
 # ------------------
-function plot () {
+function plotBar () {
 	
 	# create combined file & temp files
-	preprocessOutput
+	preprocessBarOutput
 	
 	# output image
-	graphImage="${outputDir}benchmark-output.png"
+	graphImage="${outputDir}benchmark-summarize.png"
 	
 	# plot
 	gnuplot -persist <<-EOFMarker
 		set terminal png font arial 12 size 1920,2800		# font size, size of image
-		set output "$graphImage"								# name of output image
+		set output "$graphImage"							# name of output image
 		set multiplot layout 3, 1							# 3 rows, 1 col
 		
 		set datafile separator ";"							# csv separator
@@ -191,18 +194,18 @@ function plot () {
 		unset key											# no title for data
 		set lmargin 15										# margin so names could fit
 		
-		set ylabel "Time (ms)"								# label of y
+		set ylabel "Time logarithmic (ms)"					# label of y
 		unset key
 		set title "Serialize"								# title of graph
 		unset key
-		plot "$serializeTemp" using 2:xtic(1) with boxes, \
+		plot "$summarizeSerializeTemp" using 2:xtic(1) with boxes, \
 			 "" using 0:2:(sprintf("%.1f",\$2)) with labels center offset 0,0.5 notitle
 		
-		set ylabel "Time (ms)"
+		set ylabel "Time logarithmic (ms)"
 		unset key
 		set title "Deserialize"
 		unset key
-		plot "$deserializeTemp" using 3:xtic(1) with boxes, \
+		plot "$summarizeDeserializeTemp" using 3:xtic(1) with boxes, \
 			 "" using 0:3:(sprintf("%.1f",\$3)) with labels center offset 0,0.5 notitle
 			
 		set ylabel "Size (kB)"
@@ -221,12 +224,95 @@ function plot () {
 }
 
 
+
+# ----------------------------------------------
+# Create combined file & temp files for box plot
+# ----------------------------------------------
+function preprocessBoxOutput () {
+	
+	phpSerializeCsv="${outDir}php-serialize.csv"
+	phpDeserializeCsv="${outDir}php-deserialize.csv"
+	
+	javaSerializeCsv="${outDir}java-serialize.csv"
+	javaDeserializeCsv="${outDir}java-deserialize.csv"
+	
+	nodeSerializeCsv="${outDir}nodejs-serialize.csv"
+	nodeDeserializeCsv="${outDir}nodejs-deserialize.csv"
+
+	if [ -r "$outDir$phpSerializeCsv" ] && 
+	[ -r "$outDir$phpDeserializeCsv" ] && 
+	[ -r "$outDir$javaSerializeCsv" ] && 
+	[ -r "$outDir$javaDeserializeCsv" ] && 
+	[ -r "$outDir$nodeSerializeCsv" ] && 
+	[ -r "$outDir$nodeDeserializeCsv" ]
+	then
+		# create combined files
+		combinedSerialize="${outputDir}combined-serialize.csv"
+		$(paste -d";" $phpSerializeCsv $javaSerializeCsv $nodeSerializeCsv > $combinedSerialize)
+		
+		combinedDeserialize="${outputDir}combined-deserialize.csv"
+		$(paste -d";" $phpDeserializeCsv $javaDeserializeCsv $nodeDeserializeCsv > $combinedDeserialize)
+	else
+		error "Output files were not found or not redable."
+	fi
+}
+
+
+# ------------------
+# Plot bar graphs
+# ------------------
+function plotBox () {
+	
+	# create combined files
+	preprocessBoxOutput
+	
+	# output image
+	graphImage="${outputDir}benchmark-output.png"
+	
+	# plot
+	gnuplot -persist <<-EOFMarker
+		set terminal png font arial 12 size 1920,2000		# font size, size of image
+		set output "$graphImage"							# name of output image
+		set multiplot layout 2, 1							# 3 rows, 1 col
+		
+		set style fill solid 0.25 border -1
+		set style boxplot outliers pointtype 7
+		set style data boxplot
+		set datafile separator ";"							# csv separator
+		set xtics right rotate by 45						# rotate names of libs by 45 deg
+		set grid y											# show horizontal lines
+		set logscale y										# logaritmics scale
+		set ylabel "Time logarithmic (ms)"					# label of y
+		set lmargin 15										# margin so names could fit
+		
+		
+		set title "Serialize"								# title of graph
+		unset key
+		column_number = system("awk -F';' '{print NF; exit}' $combinedSerialize ")
+		set for [i=1:column_number] xtics (system("head -1 $combinedSerialize | sed -e 's/\"//g' | awk -F';' '{print $" . i . "}'") i)
+		plot for [i=1:column_number] '$combinedSerialize' using (i):i notitle
+		
+		set title "Deserialize"								# title of graph
+		unset key
+		column_number = system("awk -F';' '{print NF; exit}' $combinedDeserialize ")
+		set for [i=1:column_number] xtics (system("head -1 $combinedDeserialize | sed -e 's/\"//g' | awk -F';' '{print $" . i . "}'") i)
+		plot for [i=1:column_number] '$combinedDeserialize' using (i):i notitle
+	EOFMarker
+	
+	# open image in the user's preferred app
+	xdg-open $graphImage
+}
+
+
+
+
 # let's do it
 runBenchmarks
-plot
+plotBar
+plotBox
 
 echo ""
-echo "Benchmark run successfully!"
+echo "	Benchmark run successfully!"
 echo ""
 
 exit 0
