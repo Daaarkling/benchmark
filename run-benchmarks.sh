@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 
+# localisation settings (must be set for sort command)
+export LC_ALL=C
+
 # ------------------
 # Init variables
 # ------------------
 formatOptions=("native" "json" "xml" "protobuf" "msgpack" "avro")
 format=
+languageOptions=("php" "java" "nodejs")
+language=
 repetitions=100
 outputDir="./"
 testDataOptions=("small" "big")
@@ -43,6 +48,20 @@ function setFormat () {
 	error "Format must be one of these options: $formatString"
 }
 
+function setLanguage () {
+	languageString=
+	for i in ${languageOptions[@]}
+	do
+		if [ "$i" = "$1" ]
+		then
+			language=$1
+			return	
+		fi
+		languageString="$languageString $i"
+	done
+	error "Language must be one of these options: $languageString"
+}
+
 function setData () {
 	testDataString=
 	for i in ${testDataOptions[@]}
@@ -62,7 +81,7 @@ function setData () {
 	error "Test data must be one of these options: $testDataString"
 }
 
-function setRepetitions () {
+function setRepetition () {
 	if [ $1 -gt 0 ]
 	then
 		repetitions=$1
@@ -85,30 +104,6 @@ function printHelp () {
 	echo "TODO"
 	exit 0
 }
-
-# ------------------
-# Read options
-# ------------------
-while [ "$1" != "" ]; do
-	case $1 in
-		-r | --repetitions )		shift
-									setRepetitions $1
-									;;
-		-d | --out-dir )  			shift
-									setOutputDir $1
-		                        	;;
-		-f | --format )  			shift  
-									setFormat $1
-		                        	;;
-		-t | --data )  				shift
-									setData $1
-		                        	;;
-		-h | --help )           	printHelp	
-		                        	;;
-		* )                     	error "Unknown argument $1"
-    	esac
-	shift
-done
 
 # ------------------
 # Run benchmarks
@@ -136,21 +131,21 @@ function preprocessBarOutput () {
 	javaCsv="${outDir}java-summarize.csv"
 	nodeCsv="${outDir}nodejs-summarize.csv"
 	
-	if [ -r "$outDir$phpCsv" ] && [ -r "$outDir$javaCsv" ] && [ -r "$outDir$nodeCsv" ]
+	if [ -r "$phpCsv" ] && [ -r "$javaCsv" ] && [ -r "$nodeCsv" ]
 	then
 		# create combined file
 		combined="${outputDir}combined-summarize.csv"
 		$(cat $phpCsv <(tail -n+2 $javaCsv) <(tail -n+2 $nodeCsv) > $combined)
-		
+	
 		# create temp files
 		summarizeSerializeTemp=$(mktemp /tmp/benchmark-serialize.csv.XXXXXX)
-		$(awk -F\; '$2 != 0' $combined > $summarizeSerializeTemp)
+		$(tail -n+2 $combined | awk -F";" '$2 != 0 {gsub("\"","", $2); print $1";"$2}' | sort -t";" -nk2 > $summarizeSerializeTemp)
 		
 		summarizeDeserializeTemp=$(mktemp /tmp/benchmark-deserialize.csv.XXXXXX)
-		$(awk -F\; '$3 != 0' $combined > $summarizeDeserializeTemp)
+		$(tail -n+2 $combined | awk -F";" '$3 != 0 {gsub("\"","", $3); print $1";"$3}' | sort -t";" -nk2 > $summarizeDeserializeTemp)
 		
 		sizeTemp=$(mktemp /tmp/benchmark-size.csv.XXXXXX)
-		$(awk -F\; '$4 != 0' $combined > $sizeTemp)
+		$(tail -n+2 $combined | awk -F";" '$4 != 0 {gsub("\"","", $4); print $1";"$4}' | sort -t";" -nk2 > $sizeTemp)
 	else
 		error "Output files were not found or not redable."
 	fi
@@ -174,46 +169,45 @@ function plotBar () {
 	
 	# create combined file & temp files
 	preprocessBarOutput
-	
+
 	# output image
-	graphImage="${outputDir}benchmark-summarize.png"
+	graphImage="${outputDir}benchmark-bar.png"
 	
 	# plot
 	gnuplot -persist <<-EOFMarker
-		set terminal png font arial 12 size 1920,2800		# font size, size of image
-		set output "$graphImage"							# name of output image
-		set multiplot layout 3, 1							# 3 rows, 1 col
+		set terminal png font arial 12 size 1920,2800
+		set output "$graphImage"
+		set multiplot layout 3, 1
+		set lmargin 25
+		set datafile separator ";"
+		set grid y
+		set logscale y
+		set xtics right rotate by 45
+		set style fill solid border -1
 		
-		set datafile separator ";"							# csv separator
-		set style fill solid 0.8 border -1					# style of bar chart
-		set boxwidth 0.5 relative							# style of bar chart
-		set grid y											# show horizontal lines
-		set logscale y										# logaritmics scale
-		set xtics right rotate by 45						# rotate names of libs by 45 deg
-		set key autotitle columnhead 						# skip first line in csv	
-		unset key											# no title for data
-		set lmargin 15										# margin so names could fit
+		bgcolor(value) = (language=word(value, 1), language eq "php" ? 1 : language eq "java" ? 2 : 3)
 		
-		set ylabel "Time logarithmic (ms)"					# label of y
+		set ylabel "Time logarithmic (ms)"
 		unset key
-		set title "Serialize"								# title of graph
+		set title "Serialize"
 		unset key
-		plot "$summarizeSerializeTemp" using 2:xtic(1) with boxes, \
+		# using #xval:ydata:boxwidth:color_index:xtic_labels
+		plot "$summarizeSerializeTemp" using (column(0)):2:(0.5):(bgcolor(stringcolumn(1))):xtic(1) with boxes lc variable, \
 			 "" using 0:2:(sprintf("%.1f",\$2)) with labels center offset 0,0.5 notitle
 		
 		set ylabel "Time logarithmic (ms)"
 		unset key
 		set title "Deserialize"
 		unset key
-		plot "$summarizeDeserializeTemp" using 3:xtic(1) with boxes, \
-			 "" using 0:3:(sprintf("%.1f",\$3)) with labels center offset 0,0.5 notitle
+		plot "$summarizeDeserializeTemp" using (column(0)):2:(0.5):(bgcolor(stringcolumn(1))):xtic(1) with boxes lc variable, \
+			 "" using 0:2:(sprintf("%.1f",\$2)) with labels center offset 0,0.5 notitle
 			
 		set ylabel "Size (kB)"
 		unset key
 		set title "Size of serialized data"
 		unset key
-		plot "$sizeTemp" using 4:xtic(1) with boxes, \
-			 "" using 0:4:(sprintf("%.1f",\$4)) with labels center offset 0,0.5 notitle
+		plot "$sizeTemp" using (column(0)):2:(0.5):(bgcolor(stringcolumn(1))):xtic(1) with boxes lc variable, \
+			 "" using 0:2:(sprintf("%.1f",\$2)) with labels center offset 0,0.5 notitle
 	EOFMarker
 	
 	# open image in the user's preferred app
@@ -239,12 +233,12 @@ function preprocessBoxOutput () {
 	nodeSerializeCsv="${outDir}nodejs-serialize.csv"
 	nodeDeserializeCsv="${outDir}nodejs-deserialize.csv"
 
-	if [ -r "$outDir$phpSerializeCsv" ] && 
-	[ -r "$outDir$phpDeserializeCsv" ] && 
-	[ -r "$outDir$javaSerializeCsv" ] && 
-	[ -r "$outDir$javaDeserializeCsv" ] && 
-	[ -r "$outDir$nodeSerializeCsv" ] && 
-	[ -r "$outDir$nodeDeserializeCsv" ]
+	if [ -r "$phpSerializeCsv" ] && 
+	[ -r "$phpDeserializeCsv" ] && 
+	[ -r "$javaSerializeCsv" ] && 
+	[ -r "$javaDeserializeCsv" ] && 
+	[ -r "$nodeSerializeCsv" ] && 
+	[ -r "$nodeDeserializeCsv" ]
 	then
 		# create combined files
 		combinedSerialize="${outputDir}combined-serialize.csv"
@@ -267,32 +261,31 @@ function plotBox () {
 	preprocessBoxOutput
 	
 	# output image
-	graphImage="${outputDir}benchmark-output.png"
+	graphImage="${outputDir}benchmark-box.png"
 	
 	# plot
 	gnuplot -persist <<-EOFMarker
-		set terminal png font arial 12 size 1920,2000		# font size, size of image
-		set output "$graphImage"							# name of output image
-		set multiplot layout 2, 1							# 3 rows, 1 col
+		set terminal png font arial 12 size 1920,2000
+		set output "$graphImage"
+		set multiplot layout 2, 1
 		
 		set style fill solid 0.25 border -1
 		set style boxplot outliers pointtype 7
 		set style data boxplot
-		set datafile separator ";"							# csv separator
-		set xtics right rotate by 45						# rotate names of libs by 45 deg
-		set grid y											# show horizontal lines
-		set logscale y										# logaritmics scale
-		set ylabel "Time logarithmic (ms)"					# label of y
-		set lmargin 15										# margin so names could fit
+		set datafile separator ";"
+		set xtics right rotate by 45
+		set grid y
+		set logscale y
+		set ylabel "Time logarithmic (ms)"
+		set lmargin 25
 		
-		
-		set title "Serialize"								# title of graph
+		set title "Serialize"
 		unset key
 		column_number = system("awk -F';' '{print NF; exit}' $combinedSerialize ")
 		set for [i=1:column_number] xtics (system("head -1 $combinedSerialize | sed -e 's/\"//g' | awk -F';' '{print $" . i . "}'") i)
 		plot for [i=1:column_number] '$combinedSerialize' using (i):i notitle
 		
-		set title "Deserialize"								# title of graph
+		set title "Deserialize"
 		unset key
 		column_number = system("awk -F';' '{print NF; exit}' $combinedDeserialize ")
 		set for [i=1:column_number] xtics (system("head -1 $combinedDeserialize | sed -e 's/\"//g' | awk -F';' '{print $" . i . "}'") i)
@@ -304,7 +297,32 @@ function plotBox () {
 }
 
 
-
+# ------------------
+# Read options
+# ------------------
+while [ "$1" != "" ]; do
+	case $1 in
+		-r | --repetitions )		shift
+									setRepetition $1
+									;;
+		-d | --out-dir )			shift
+									setOutputDir $1
+									;;
+		-f | --format )				shift
+									setFormat $1
+								 	;;
+		-l | --language )			shift
+									setLanguage $1
+									;;
+		-t | --data )				shift
+									setData $1
+									;;
+		-h | --help )				printHelp
+									;;
+		* )							error "Unknown argument $1"
+		esac
+	shift
+done
 
 # let's do it
 runBenchmarks
@@ -312,7 +330,7 @@ plotBar
 plotBox
 
 echo ""
-echo "	Benchmark run successfully!"
+echo "Benchmark run successfully!"
 echo ""
 
 exit 0
