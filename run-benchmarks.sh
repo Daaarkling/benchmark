@@ -10,8 +10,8 @@ formatOptions=("native" "json" "xml" "protobuf" "msgpack" "avro")
 format=
 languageOptions=("php" "java" "nodejs")
 language=
-repetitions=100
-outputDir="./"
+repetition=100
+outDir="./"
 testDataOptions=("small" "big")
 testData=$(readlink -f "./testdata/test_data_${testDataOptions[0]}.json")
 summarizeSerializeTemp=
@@ -25,10 +25,10 @@ combinedDeserialize=
 # ------------------
 # Validation
 # ------------------
-function setOutputDir () {
+function setOutDir () {
 	if [ -d "$1" ] && [ -w "$1" ]
 	then
-		outputDir=$1
+		outDir=$1
 	else
 		error "Output path is not a directory or is not writable."
 	fi
@@ -84,9 +84,9 @@ function setData () {
 function setRepetition () {
 	if [ $1 -gt 0 ]
 	then
-		repetitions=$1
+		repetition=$1
 	else
-		error "Repetitions must be greater then zero."
+		error "repetition must be greater then zero."
 	fi
 }
 
@@ -109,17 +109,35 @@ function printHelp () {
 # Run benchmarks
 # ------------------
 function runBenchmarks () {
+
+	runDocker "darkling/benchmark-nodejs:7.5" "nodejs"
+	exit 0
+
+	
 	
 	if [ "$format" != "" ]
 	then
-		php ./benchmark-php/init.php b:r -o csv -r "$repetitions" -d "$outputDir" -f "$format" -t "$testData" > /dev/null
-		java -jar benchmark-java/target/benchmark-java-1.0-jar-with-dependencies.jar -o csv -r "$repetitions" -d "$outputDir" -f "$format" -t "$testData" > /dev/null
-		node ./benchmark-nodejs/init.js -o csv -r "$repetitions" -d "$outputDir" -f "$format" -t "$testData" > /dev/null
+		php ./benchmark-php/init.php b:r -o csv -r "$repetition" -d "$outDir" -f "$format" -t "$testData" > /dev/null
+		java -jar benchmark-java/target/benchmark-java-1.0-jar-with-dependencies.jar -o csv -r "$repetition" -d "$outDir" -f "$format" -t "$testData" > /dev/null
+		#node ./benchmark-nodejs/init.js -o csv -r "$repetition" -d "$outDir" -f "$format" -t "$testData" > /dev/null
 	else
-		php ./benchmark-php/init.php b:r -o csv -r "$repetitions" -d "$outputDir" -t "$testData" > /dev/null
-		java -jar benchmark-java/target/benchmark-java-1.0-jar-with-dependencies.jar -o csv -r "$repetitions" -d "$outputDir" -t "$testData" > /dev/null
-		node ./benchmark-nodejs/init.js -o csv -r "$repetitions" -d "$outputDir" -t "$testData" > /dev/null
+		php ./benchmark-php/init.php b:r -o csv -r "$repetition" -d "$outDir" -t "$testData" > /dev/null
+		java -jar benchmark-java/target/benchmark-java-1.0-jar-with-dependencies.jar -o csv -r "$repetition" -d "$outDir" -t "$testData" > /dev/null
+		node ./benchmark-nodejs/init.js -o csv -r "$repetition" -d "$outDir" -t "$testData" > /dev/null
 	fi
+}
+
+# --------------------------------
+# Run specific benchmark in docker
+# --------------------------------
+function runDocker() {
+
+	$(docker run -i --name benchmark -e "repetition=$repetition" -e "format=$format" $1 > /dev/null)
+	$(docker cp benchmark:/opt/benchmark/benchmark-nodejs/output/${2}-serialize.csv $outDir)
+	$(docker cp benchmark:/opt/benchmark/benchmark-nodejs/output/${2}-deserialize.csv $outDir)
+	$(docker cp benchmark:/opt/benchmark/benchmark-nodejs/output/${2}-summarize.csv $outDir)
+	$(docker cp benchmark:/opt/benchmark/benchmark-nodejs/output/${2}-info.txt $outDir)
+	$(docker rm benchmark > /dev/null)
 }
 
 # ----------------------------------------------
@@ -134,7 +152,7 @@ function preprocessBarOutput () {
 	if [ -r "$phpCsv" ] && [ -r "$javaCsv" ] && [ -r "$nodeCsv" ]
 	then
 		# create combined file
-		combined="${outputDir}combined-summarize.csv"
+		combined="${outDir}combined-summarize.csv"
 		$(cat $phpCsv <(tail -n+2 $javaCsv) <(tail -n+2 $nodeCsv) > $combined)
 	
 		# create temp files
@@ -147,7 +165,7 @@ function preprocessBarOutput () {
 		sizeTemp=$(mktemp /tmp/benchmark-size.csv.XXXXXX)
 		$(tail -n+2 $combined | awk -F";" '$4 != 0 {gsub("\"","", $4); print $1";"$4}' | sort -t";" -nk2 > $sizeTemp)
 	else
-		error "Output files were not found or not redable."
+		error "Output files were not found or not readable."
 	fi
 }
 
@@ -171,7 +189,7 @@ function plotBar () {
 	preprocessBarOutput
 
 	# output image
-	graphImage="${outputDir}benchmark-bar.png"
+	graphImage="${outDir}benchmark-bar.png"
 	
 	# plot
 	gnuplot -persist <<-EOFMarker
@@ -241,13 +259,13 @@ function preprocessBoxOutput () {
 	[ -r "$nodeDeserializeCsv" ]
 	then
 		# create combined files
-		combinedSerialize="${outputDir}combined-serialize.csv"
+		combinedSerialize="${outDir}combined-serialize.csv"
 		$(paste -d";" $phpSerializeCsv $javaSerializeCsv $nodeSerializeCsv > $combinedSerialize)
 		
-		combinedDeserialize="${outputDir}combined-deserialize.csv"
+		combinedDeserialize="${outDir}combined-deserialize.csv"
 		$(paste -d";" $phpDeserializeCsv $javaDeserializeCsv $nodeDeserializeCsv > $combinedDeserialize)
 	else
-		error "Output files were not found or not redable."
+		error "Output files were not found or not readable."
 	fi
 }
 
@@ -261,7 +279,7 @@ function plotBox () {
 	preprocessBoxOutput
 	
 	# output image
-	graphImage="${outputDir}benchmark-box.png"
+	graphImage="${outDir}benchmark-box.png"
 	
 	# plot
 	gnuplot -persist <<-EOFMarker
@@ -302,32 +320,32 @@ function plotBox () {
 # ------------------
 while [ "$1" != "" ]; do
 	case $1 in
-		-r | --repetitions )		shift
+		-r | --repetition )		shift
 									setRepetition $1
 									;;
-		-d | --out-dir )			shift
-									setOutputDir $1
-									;;
-		-f | --format )				shift
+		-d | --out-dir )  			shift
+									setOutDir $1
+		                        	;;
+		-f | --format )  			shift  
 									setFormat $1
-								 	;;
-		-l | --language )			shift
+		                        	;;
+		-l | --language )  			shift  
 									setLanguage $1
-									;;
-		-t | --data )				shift
+		                        	;;
+		-t | --data )  				shift
 									setData $1
-									;;
-		-h | --help )				printHelp
-									;;
-		* )							error "Unknown argument $1"
-		esac
+		                        	;;
+		-h | --help )           	printHelp	
+		                        	;;
+		* )                     	error "Unknown argument $1"
+    	esac
 	shift
 done
 
 # let's do it
 runBenchmarks
-plotBar
-plotBox
+#plotBar
+#plotBox
 
 echo ""
 echo "Benchmark run successfully!"
