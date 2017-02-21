@@ -7,6 +7,9 @@
     "type": "git",
     "url": "https://github.com/Daaarkling/benchmark.git"
   },
+  "scripts": {
+    "start": "node init.js"
+  },
   "dependencies": {
     "avsc": "4.1.11",
     "cli-table": "^0.3.1",

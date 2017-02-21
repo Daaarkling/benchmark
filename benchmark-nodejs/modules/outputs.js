@@ -1,5 +1,6 @@
 var json2csv = require('json2csv');
 var fs = require('fs');
+var path = require('path');
 var Table = require('cli-table');
 var metric = require('./metrics/metric');
 
@@ -10,9 +11,9 @@ exports.csv = function(result, info, outDir = "./") {
 	var trans = transformResult(result);
 	var transSum = transformResultSummarize(result);
 
-	printCsv(outDir + "nodejs-serialize.csv", trans.headersSerialize, trans.rowsSerialize);
-	printCsv(outDir + "nodejs-deserialize.csv", trans.headersDeserialize, trans.rowsDeserialize);
-	printCsv(outDir + "nodejs-summarize.csv", transSum.headers, transSum.rows);
+	printCsv(path.join(outDir, "nodejs-serialize.csv"), trans.headersSerialize, trans.rowsSerialize);
+	printCsv(path.join(outDir, "nodejs-deserialize.csv"), trans.headersDeserialize, trans.rowsDeserialize);
+	printCsv(path.join(outDir, "nodejs-summarize.csv"), transSum.headers, transSum.rows);
 	
 	var infoString = "NODEJS version: " + info.version +
 					"\nTest data size (raw): " + info.size +
@@ -20,7 +21,7 @@ exports.csv = function(result, info, outDir = "./") {
 					"\nInner repetition: " + info.inner +
 					"\nDate: " + info.date;
 	
-	fs.writeFile('nodejs-info.txt', infoString, function (err) {
+	fs.writeFile(path.join(outDir, 'nodejs-info.txt'), infoString, function (err) {
   		if (err) throw error;
 	});
 }
