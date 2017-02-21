@@ -70,7 +70,7 @@ public class Config {
 		if (format != null) {
 			metrics.removeIf((item) -> !item.getInfo().getFormat().equals(format));
 		}
-		metrics.removeIf((item) -> !item.getInfo().getName().equals("LoganSquare") && !item.getInfo().getName().equals("dsl-json"));
+		//metrics.removeIf((item) -> !item.getInfo().getName().equals("LoganSquare") && !item.getInfo().getName().equals("dsl-json"));
 		//metrics.removeIf((item) -> !item.getInfo().getName().equals("LoganSquare"));
 	}
 

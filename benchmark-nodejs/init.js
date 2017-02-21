@@ -13,7 +13,7 @@ cli.option("-o, --output <s>", "Handle output, you can choose from several choic
 	.option("-d --out-dir <s>", "Output directory, only for 'csv' and 'file' output options.")
 	.option("-t --test-data <s>", "Path to test data.")
 	.option("-r, --repetitions <n>", "Number of repetitions.")
-  	.option("-f, --format <s>", "Run benchmark for specific format only.")
+  	.option("-f, --format [s]", "Run benchmark for specific format only.")
   	.parse(process.argv);
 
 
@@ -62,7 +62,7 @@ if(cli.repetitions) {
 	}
 }
 
-if(cli.format) {
+if(cli.format && cli.format != null) {
 	if (formats.includes(cli.format)) {
 		config.format = cli.format;
 	} else {
