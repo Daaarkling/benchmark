@@ -1,7 +1,6 @@
 <?php
 
 use Benchmark\Commands\RunCommand;
-use Benchmark\Commands\ValidateCommand;
 use Composer\Autoload\ClassLoader;
 use Nette\Caching\Storages\FileStorage;
 use Nette\Loaders\RobotLoader;
