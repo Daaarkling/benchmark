@@ -2,6 +2,7 @@ benchmark-php/vendor/*
 benchmark-php/temp/*
 benchmark-php/output/*
 benchmark-php/testdata/test_data_huge.json
+benchmark-php/composer.lock
 
 benchmark-java/output/*
 benchmark-java/target
