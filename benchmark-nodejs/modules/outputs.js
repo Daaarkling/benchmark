@@ -6,30 +6,30 @@ var metric = require('./metrics/metric');
 
 
 
-exports.csv = function(result, info, outDir = "./") {
+exports.csv = function(result, config) {
 	
-	var trans = transformResult(result);
+	var trans = transformResult(result, config.outer);
 	var transSum = transformResultSummarize(result);
 
-	printCsv(path.join(outDir, "nodejs-serialize.csv"), trans.headersSerialize, trans.rowsSerialize);
-	printCsv(path.join(outDir, "nodejs-deserialize.csv"), trans.headersDeserialize, trans.rowsDeserialize);
-	printCsv(path.join(outDir, "nodejs-summarize.csv"), transSum.headers, transSum.rows);
+	printCsv(path.join(config.outDir, "nodejs-serialize.csv"), trans.headersSerialize, trans.rowsSerialize);
+	printCsv(path.join(config.outDir, "nodejs-deserialize.csv"), trans.headersDeserialize, trans.rowsDeserialize);
+	printCsv(path.join(config.outDir, "nodejs-summarize.csv"), transSum.headers, transSum.rows);
 	
-	var infoString = "NODEJS version: " + info.version +
-					"\nTest data size (raw): " + info.size +
-					"\nOuter repetition: " + info.outer +
-					"\nInner repetition: " + info.inner +
-					"\nDate: " + info.date;
+	var infoString = "NODEJS version: " + config.version +
+					"\nTest data size (raw): " + config.size +
+					"\nOuter repetition: " + config.outer +
+					"\nInner repetition: " + config.inner +
+					"\nDate: " + new Date().toISOString();
 	
-	fs.writeFile(path.join(outDir, 'nodejs-info.txt'), infoString, function (err) {
+	fs.writeFile(path.join(config.outDir, 'nodejs-info.txt'), infoString, function (err) {
   		if (err) throw error;
 	});
 }
 
 
-exports.console = function(result, info) {
+exports.console = function(result, config) {
 
-	var trans = transformResult(result);
+	var trans = transformResult(result, config.outer);
 	var transSum = transformResultSummarize(result);
 	
 	printTable("nodejs serialize", trans.headersSerialize, trans.rowsSerialize);
@@ -37,23 +37,23 @@ exports.console = function(result, info) {
 	printTable("nodejs summarize", transSum.headers, transSum.rows);
 	
 	console.log("\nBenchmark info\n");
-	console.log("NODEJS version: " + info.version);
-	console.log("Test data size (raw): " + info.size);
-	console.log("Outer repetition: " + info.outer);
-	console.log("Inner repetition: " + info.inner);
-	console.log("Date: " + info.date + "\n");
+	console.log("NODEJS version: " + config.version);
+	console.log("Test data size (raw): " + config.size);
+	console.log("Outer repetition: " + config.outer);
+	console.log("Inner repetition: " + config.inner);
+	console.log("Date: " + new Date().toISOString() + "\n");
 }
 
 
 
-var transformResult = function(result) {
+var transformResult = function(result, outer) {
 	
 	var headersSerialize = [];
 	var headersDeserialize = [];
 	var rowsSerialize = [];
 	var rowsDeserialize = [];
 	
-	for (var i = 0; i < global.OUTER_REPETITION; i++) {
+	for (var i = 0; i < outer; i++) {
 		var rowSerialize = [];
 		var rowDeserialize = [];
 		result.forEach((item) => {

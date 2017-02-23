@@ -16,7 +16,7 @@ metric.prototype.fullName = function() {
 	return "nodejs - " + this.format + " - " + this.name;
 };
 
-metric.prototype.run = function(testData, repetitions = 1000) {
+metric.prototype.run = function(testData, inner, outer) {
 		
 	var result = {
 		name: this.fullName(),
@@ -36,9 +36,9 @@ metric.prototype.run = function(testData, repetitions = 1000) {
 		result.size = serializedData.length;
 
 		// run
-		for (var j = 0; j < global.OUTER_REPETITION; j++){
+		for (var j = 0; j < outer; j++){
 			start = process.hrtime();
-			for (var i = 0; i < repetitions; i++) {
+			for (var i = 0; i < inner; i++) {
 				this.serializeImpl(testData);
 			}
 			diff = process.hrtime(start);
@@ -60,9 +60,9 @@ metric.prototype.run = function(testData, repetitions = 1000) {
 		this.deserializeImpl(serializedData);
 
 		// run
-		for (var j = 0; j < global.OUTER_REPETITION; j++){
+		for (var j = 0; j < outer; j++){
 			start = process.hrtime();
-			for (var i = 0; i < repetitions; i++) {
+			for (var i = 0; i < inner; i++) {
 				this.deserializeImpl(serializedData);
 			}
 			diff = process.hrtime(start);

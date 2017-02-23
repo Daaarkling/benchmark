@@ -6,13 +6,13 @@ var fs = require("fs");
 var	formats = ["json", "xml", "msgpack", "protobuf", "avro"];
 var	outputs = ["console", "csv"];
 
-global.OUTER_REPETITION = 30;
 
 // configurate command options
-cli.option("-o, --output <s>", "Handle output, you can choose from several choices: " + outputs.join(", "))
+cli.option("-r, --result <s>", "Handle output, you can choose from several choices: " + outputs.join(", "))
 	.option("-d --out-dir <s>", "Output directory, only for 'csv' and 'file' output options.")
 	.option("-t --test-data <s>", "Path to test data.")
-	.option("-r, --repetitions <n>", "Number of repetitions.")
+	.option("-i, --inner <n>", "Number of inner repetitions.")
+	.option("-o, --outer <n>", "Number of outer repetitions.")
   	.option("-f, --format [s]", "Run benchmark for specific format only.")
   	.parse(process.argv);
 
@@ -21,11 +21,14 @@ cli.option("-o, --output <s>", "Handle output, you can choose from several choic
 var config = {
 	testData: null,
 	testDataSize: 0,
-	repetitions: 100,
-	output: "console",
+	inner: 100,
+	outer: 30,
+	result: "console",
 	outDir: "./",
-	format: ""
+	format: null,
+	version: process.version
 };
+
 
 // set config values from cli
 if(cli.testData) {
@@ -40,7 +43,7 @@ function testData(filePath) {
 		try {
 			fs.accessSync(filePath, fs.constants.R_OK);
 			config.testData = require(path.resolve(filePath));
-			config.testDataSize = stats.size;
+			config.size = (stats.size / 1024).toFixed(2) + " (kB)";
 		} catch (err) {
 			console.error("\n  error: Test data file is not redeable.\n");
 			process.exit(1);
@@ -51,18 +54,25 @@ function testData(filePath) {
 	}
 } 
 
-// set config values from cli
-
-if(cli.repetitions) {
-	if (parseInt(cli.repetitions) && cli.repetitions > 0) {
-		config.repetitions = parseInt(cli.repetitions);
+if(cli.outer) {
+	if (parseInt(cli.outer) && cli.outer > 0) {
+		config.outer = parseInt(cli.outer);
 	} else {
-		console.error("\n  error: Repetitions must be whole number greater than zero.\n");
+		console.error("\n  error: Number of outer repetitions must be whole number greater than zero.\n");
 		process.exit(1);
 	}
 }
 
-if(cli.format && cli.format != null) {
+if(cli.inner) {
+	if (parseInt(cli.inner) && cli.inner > 0) {
+		config.inner = parseInt(cli.inner);
+	} else {
+		console.error("\n  error: Number of inner repetitions must be whole number greater than zero.\n");
+		process.exit(1);
+	}
+}
+
+if(cli.format && cli.format != true) {
 	if (formats.includes(cli.format)) {
 		config.format = cli.format;
 	} else {
@@ -71,16 +81,16 @@ if(cli.format && cli.format != null) {
 	}
 }
 
-if(cli.output) {
-	if (outputs.includes(cli.output)) {
-		config.output = cli.output;
+if(cli.result) {
+	if (outputs.includes(cli.result)) {
+		config.result = cli.result;
 	} else {
-		console.error("\n  error: Output must be one of these options: " + outputs.join(", ") + "\n");
+		console.error("\n  error: Result must be one of these options: " + outputs.join(", ") + "\n");
 		process.exit(1);
 	}
 }
 
-if(cli.output === "csv" && cli.outDir) {
+if(cli.result === "csv" && cli.outDir) {
 	if (fs.lstatSync(cli.outDir).isDirectory()) {
 		try {
 			fs.accessSync(cli.outDir, fs.constants.W_OK);

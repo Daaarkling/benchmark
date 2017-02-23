@@ -19,21 +19,13 @@ exports.run = function(config) {
 		});
 	}
 
-	
 	// run benchmarks
 	result = [];
 	metrics.forEach((metric) => {
-		result.push(metric.run(config.testData, config.repetitions));
+		result.push(metric.run(config.testData, config.inner, config.outer));
 	});
-	
-	var info = {
-		version: process.version,
-		size: (config.testDataSize / 1024).toFixed(2) + " (kB)",
-		outer: global.OUTER_REPETITION,
-		inner: config.repetitions,
-		date: new Date().toISOString()
-	};
+
 	
 	// hande output (run function by its string name)
-	outputs[config.output](result, info, config.outDir);
+	outputs[config.result](result, config);
 }
