@@ -17,7 +17,8 @@ class Config
 	const FORMAT_NATIVE = 'native';
 	const FORMATS = [self::FORMAT_NATIVE, self::FORMAT_JSON, self::FORMAT_XML, self::FORMAT_AVRO, self::FORMAT_MSGPACK, self::FORMAT_PROTOBUF];
 
-	const REPETITIONS_DEFAULT = 100;
+	const REPETITIONS_INNER = 100;
+	const REPETITIONS_OUTER = 30;
 
 	/** @var string */
 	public static $testDataFile = __DIR__ . '/../testdata/test_data_small.json';
@@ -29,21 +30,28 @@ class Config
 	private $testData;
 
 	/** @var int */
-	private $repetitions = self::REPETITIONS_DEFAULT;
+	private $inner = self::REPETITIONS_INNER;
+
+	/** @var int */
+	private $outer = self::REPETITIONS_OUTER;
 
 	/** @var null|string */
 	private $format;
 
+
+
 	/**
 	 * Config constructor.
 	 * @param string $testData
-	 * @param int $repetitions
+	 * @param int $inner
+	 * @param int $outer
 	 * @param string $format
 	 */
-	public function __construct($testData, $repetitions = self::REPETITIONS_DEFAULT, $format = NULL)
+	public function __construct($testData, $inner = self::REPETITIONS_INNER, $outer = self::REPETITIONS_OUTER, $format = NULL)
 	{
 		$this->testData = $testData;
-		$this->repetitions = $repetitions;
+		$this->inner = $inner;
+		$this->outer = $outer;
 		$this->format = $format;
 		$this->findMetrics();
 	}
@@ -96,22 +104,40 @@ class Config
 	/**
 	 * @return int
 	 */
-	public function getRepetitions()
+	public function getInner()
 	{
-		return $this->repetitions;
+		return $this->inner;
 	}
 
 	/**
-	 * @param int $repetitions
+	 * @param int $inner
 	 */
-	public function setRepetitions($repetitions)
+	public function setInner($inner)
 	{
-		if ($repetitions >= 1) {
-			$this->repetitions = $repetitions;
+		if ($inner >= 1) {
+			$this->inner = $inner;
 		} else {
-			$this->repetitions = self::REPETITIONS_DEFAULT;
+			$this->inner = self::REPETITIONS_INNER;
 		}
 	}
+
+	/**
+	 * @return int
+	 */
+	public function getOuter()
+	{
+		return $this->outer;
+	}
+
+	/**
+	 * @param int $outer
+	 */
+	public function setOuter($outer)
+	{
+		$this->outer = $outer;
+	}
+
+
 
 	/**
 	 * @return null|string

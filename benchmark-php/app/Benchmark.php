@@ -32,13 +32,14 @@ class Benchmark
 		$result = [];
 		$data = $this->prepareData();
 		$dataFile = $this->config->getTestData();
-		$repetitions = $this->config->getRepetitions();
+		$inner = $this->config->getInner();
+		$outer = $this->config->getOuter();
 
 		foreach ($this->config->getMetrics() as $metric){
 
 
 			// Run metric benchmark
-			$metricResult = $metric->run($data, $dataFile, $repetitions);
+			$metricResult = $metric->run($data, $dataFile, $inner, Config::REPETITIONS_OUTER, $outer);
 
 			if($metricResult === NULL){
 				continue;
@@ -61,8 +62,8 @@ class Benchmark
 		return [
 			'PHP version' => phpversion(),
 			'Test data size (raw)' => round(filesize($this->config->getTestData()) / 1024, 2) . ' kB',
-			'Outer repetition' => IMetric::OUTER_REPETITION,
-			'Inner repetition' => $this->config->getRepetitions(),
+			'Outer repetition' => $this->config->getOuter(),
+			'Inner repetition' => $this->config->getInner(),
 			'Date' => (new \DateTime())->format('c'),
 		];
 	}

@@ -3,14 +3,20 @@
 namespace Benchmark\Output;
 
 
-use Benchmark\Config;
-use Benchmark\Metrics\IMetric;
 use Benchmark\Metrics\MetricResult;
 
 
 abstract class AOutputHandler implements IOutputHandler
 {
 
+	/** @var int */
+	protected $outer;
+
+
+	public function __construct($outer)
+	{
+		$this->outer = $outer;
+	}
 
 	public function handleBenchmarkResult($result)
 	{
@@ -53,7 +59,7 @@ abstract class AOutputHandler implements IOutputHandler
 		$rowsSerialize = [];
 		$rowsDeserialize = [];
 
-		for ($i = 0; $i < IMetric::OUTER_REPETITION; $i++) {
+		for ($i = 0; $i < $this->outer; $i++) {
 			foreach ($result as $metricResult) {
 				if ($i === 0) {
 					if (!$metricResult->isSerializeEmpty()) {

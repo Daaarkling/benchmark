@@ -22,7 +22,7 @@ class AvroOfficial implements IMetric
 	}
 
 
-	public function run($data, $dataFile, $repetitions = Config::REPETITIONS_DEFAULT)
+	public function run($data, $dataFile, $inner = Config::REPETITIONS_INNER, $outer = Config::REPETITIONS_OUTER)
 	{
 		$result = new MetricResult();
 		$result->setInfo($this->getInfo());
@@ -31,9 +31,9 @@ class AvroOfficial implements IMetric
 		// Do it once to warm up.
 		$this->serialize($data);
 
-		for ($j = 0; $j < IMetric::OUTER_REPETITION; $j++) {
+		for ($j = 0; $j < $outer; $j++) {
 			$resultSerialize = [];
-			for ($i = 1; $i <= $repetitions; $i++) {
+			for ($i = 1; $i <= $inner; $i++) {
 				$resultSerialize[] = $this->serialize($data);
 			}
 
@@ -47,7 +47,7 @@ class AvroOfficial implements IMetric
 
 
 			$time = 0;
-			for ($i = 1; $i <= $repetitions; $i++) {
+			for ($i = 1; $i <= $inner; $i++) {
 				$time += $this->deserialize($rS['string']);
 			}
 			$result->addDeserialize($time);

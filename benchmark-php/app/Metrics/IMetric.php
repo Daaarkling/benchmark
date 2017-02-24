@@ -17,8 +17,10 @@ interface IMetric
 	/**
 	 * @param mixed $data
 	 * @param string $dataFile
-	 * @param int $repetitions
+	 * @param int $inner
+	 * @param int $outer
 	 * @return MetricResult
+	 * @internal param int $repetitions
 	 */
-	public function run($data, $dataFile, $repetitions = Config::REPETITIONS_DEFAULT);
+	public function run($data, $dataFile, $inner = Config::REPETITIONS_INNER, $outer = Config::REPETITIONS_OUTER);
 }

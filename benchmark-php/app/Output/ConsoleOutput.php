@@ -21,8 +21,9 @@ class ConsoleOutput extends AOutputHandler
 	protected $io;
 	
 	
-	public function __construct(InputInterface $input, OutputInterface $output)
+	public function __construct($outer, InputInterface $input, OutputInterface $output)
 	{
+		parent::__construct($outer);
 		$this->io = new SymfonyStyle($input, $output);
 	}
 

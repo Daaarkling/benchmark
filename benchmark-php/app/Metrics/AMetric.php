@@ -3,6 +3,8 @@
 namespace Benchmark\Metrics;
 
 
+use Benchmark\Config;
+
 abstract class AMetric implements IMetric
 {
 
@@ -16,10 +18,12 @@ abstract class AMetric implements IMetric
 	/**
 	 * @param mixed $data
 	 * @param string $dataFile
-	 * @param int $repetitions
+	 * @param int $inner
+	 * @param int $outer
 	 * @return MetricResult
+	 * @internal param int $repetitions
 	 */
-	public function run($data, $dataFile, $repetitions = 10)
+	public function run($data, $dataFile, $inner = Config::REPETITIONS_INNER, $outer = Config::REPETITIONS_OUTER)
 	{
 		// Prepare
 		$this->data = $data;
@@ -33,9 +37,9 @@ abstract class AMetric implements IMetric
 		// Do it once to warm up.
 		$encodedData = $this->serialize($data);
 		if ($encodedData) {
-			for ($j = 0; $j < IMetric::OUTER_REPETITION; $j++) {
+			for ($j = 0; $j < $outer; $j++) {
 				$start = microtime(TRUE);
-				for ($i = 0; $i < $repetitions; $i++) {
+				for ($i = 0; $i < $inner; $i++) {
 					$this->serialize($data);
 				}
 				$time = microtime(TRUE) - $start;
@@ -54,9 +58,9 @@ abstract class AMetric implements IMetric
 		// Do it once to warm up.
 		$outputD = $this->deserialize($encodedData);
 		if($outputD) {
-			for ($j = 0; $j < IMetric::OUTER_REPETITION; $j++) {
+			for ($j = 0; $j < $outer; $j++) {
 				$start = microtime(TRUE);
-				for ($i = 1; $i <= $repetitions; $i++) {
+				for ($i = 1; $i <= $inner; $i++) {
 					$this->deserialize($encodedData);
 				}
 				$time = microtime(TRUE) - $start;

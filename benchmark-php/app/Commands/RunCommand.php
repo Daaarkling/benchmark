@@ -26,8 +26,9 @@ class RunCommand extends Command
 		$this->setName('benchmark:run')
 			->setDescription('Run benchmark.')
 			->addOption('data', 't', InputOption::VALUE_REQUIRED, 'Set test data.')
-			->addOption('repetitions', 'r', InputOption::VALUE_REQUIRED, 'Set number of repetitions', Config::REPETITIONS_DEFAULT)
-			->addOption('output', 'o', InputOption::VALUE_REQUIRED, 'Set output. You can choose from several choices: ' . implode(', ', self::OUTPUTS) . '.', 'console')
+			->addOption('outer', 'o', InputOption::VALUE_REQUIRED, 'Number of outer repetitions')
+			->addOption('inner', 'i', InputOption::VALUE_REQUIRED, 'Number of inner repetitions')
+			->addOption('result', 'r', InputOption::VALUE_REQUIRED, 'Set output. You can choose from several choices: ' . implode(', ', self::OUTPUTS) . '.', 'console')
 			->addOption('format', 'f', InputOption::VALUE_OPTIONAL, 'Run benchmark for specific format only.')
 			->addOption('out-dir', 'd', InputOption::VALUE_REQUIRED, 'Output directory.');
 	}
@@ -51,15 +52,26 @@ class RunCommand extends Command
 		}
 
 
-		// repetitions
-		$repetitions = $input->getOption('repetitions');
-		if($repetitions !== NULL) {
-			if($repetitions < 1) {
-				$io->error("Repetitions must be whole number greater than zero.");
+		// inner repetitions
+		$inner = $input->getOption('inner');
+		if($inner !== NULL) {
+			if($inner < 1) {
+				$io->error("Number of inner repetitions must be whole number greater than zero.");
 				exit(1);
 			}
 		} else {
-			$repetitions = Config::REPETITIONS_DEFAULT;
+			$inner = Config::REPETITIONS_INNER;
+		}
+
+		// outer repetitions
+		$outer = $input->getOption('outer');
+		if($outer !== NULL) {
+			if($outer < 1) {
+				$io->error("Number of outer repetitions must be whole number greater than zero.");
+				exit(1);
+			}
+		} else {
+			$outer = Config::REPETITIONS_OUTER;
 		}
 
 
@@ -74,7 +86,7 @@ class RunCommand extends Command
 
 
 		// output
-		$outputOption = $input->getOption('output');
+		$outputOption = $input->getOption('result');
 		if ($outputOption !== NULL) {
 			if (!in_array($outputOption, self::OUTPUTS)) {
 				$io->error('Output must be one of these options: ' . implode(', ', self::OUTPUTS));
@@ -91,15 +103,15 @@ class RunCommand extends Command
 			$outputDir = $input->getOption('out-dir');
 		}
 
-		$config = new Config($testData, $repetitions, $format);
+		$config = new Config($testData, $inner, $outer, $format);
 
 
 		switch ($outputOption) {
 			case self::OUTPUT_CSV:
-				$outputHandler = new CsvOutput($outputDir);
+				$outputHandler = new CsvOutput($outer, $outputDir);
 				break;
 			default:
-				$outputHandler = new ConsoleOutput($input, $output);
+				$outputHandler = new ConsoleOutput($outer, $input, $output);
 		}
 		$benchmark = new Benchmark($config, $outputHandler);
 		$benchmark->run();

@@ -15,8 +15,9 @@ class CsvOutput extends AOutputHandler
 	private $outputDir;
 
 
-	public function __construct($outputDir)
+	public function __construct($outer, $outputDir)
 	{
+		parent::__construct($outer);
 		$this->outputDir = $outputDir;
 	}
 

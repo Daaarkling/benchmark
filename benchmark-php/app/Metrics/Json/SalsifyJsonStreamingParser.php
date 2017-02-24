@@ -20,7 +20,7 @@ class SalsifyJsonStreamingParser implements IMetric
 	}
 
 
-	public function run($data, $dataFile, $repetitions = Config::REPETITIONS_DEFAULT)
+	public function run($data, $dataFile, $inner = Config::REPETITIONS_INNER, $outer = Config::REPETITIONS_OUTER)
 	{
 		$result = new MetricResult();
 		$result->setInfo($this->getInfo());
@@ -28,9 +28,9 @@ class SalsifyJsonStreamingParser implements IMetric
 		// warm up
 		$this->deserialize($dataFile);
 
-		for ($j = 0; $j < IMetric::OUTER_REPETITION; $j++) {
+		for ($j = 0; $j < $outer; $j++) {
 			$time = 0;
-			for ($i = 1; $i <= $repetitions; $i++) {
+			for ($i = 1; $i <= $inner; $i++) {
 				$time += $this->deserialize($dataFile);
 			}
 			$result->addDeserialize($time);
