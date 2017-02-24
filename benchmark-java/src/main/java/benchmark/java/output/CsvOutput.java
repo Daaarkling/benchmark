@@ -1,6 +1,5 @@
 package benchmark.java.output;
 
-import static benchmark.java.output.ConsoleOutput.printStream;
 import com.opencsv.CSVWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -20,7 +19,8 @@ public class CsvOutput extends AOutputHandler {
 	private final String outDir;
 
 	
-	public CsvOutput(String outDir) {
+	public CsvOutput(int outer, String outDir) {
+		super(outer);
 		this.outDir = outDir;
 	}
 	

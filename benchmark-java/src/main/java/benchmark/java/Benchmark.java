@@ -41,7 +41,7 @@ public class Benchmark {
 		
 		for (IMetric metric : config.getMetrics()) {
 			// run metric benchmark
-			MetricResult metricResult = metric.run(data, config.getTestData(), config.getRepetitions());
+			MetricResult metricResult = metric.run(data, config.getTestData(), config.getInner(), config.getOuter());
 			if (metricResult != null) {
 				result.add(metricResult);
 			}
@@ -61,8 +61,8 @@ public class Benchmark {
 		Map<String, String> info = new LinkedHashMap<>();
 		info.put("JAVA version", System.getProperty("java.version"));
 		info.put("Test data size (raw)", new BigDecimal(config.getTestData().length()).divide(new BigDecimal("1024"), 2, RoundingMode.FLOOR).toString() + " (kB)");
-		info.put("Outer repetition", String.valueOf(IMetric.OUTER_REPETITION));
-		info.put("Inner repetition", String.valueOf(config.getRepetitions()));
+		info.put("Outer repetition", String.valueOf(config.getOuter()));
+		info.put("Inner repetition", String.valueOf(config.getInner()));
 		info.put("Date", nowAsISO);
 		return info;
 	}

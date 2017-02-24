@@ -53,12 +53,14 @@ public class Config {
 	
 	private List<IMetric> metrics;
 	private final File testData;
-	private final int repetitions;
+	private final int inner;
+	private final int outer;
 	private final Format format;
 
 	private Config(Builder builder) {
 		this.testData = builder.testData;
-		this.repetitions = builder.repetitions;
+		this.inner = builder.inner;
+		this.outer = builder.outer;
 		this.format = builder.format;
 		findMetrics();
 	}
@@ -74,6 +76,11 @@ public class Config {
 		//metrics.removeIf((item) -> !item.getInfo().getName().equals("LoganSquare"));
 	}
 
+	public static Builder newBuilder(File testData) {
+		
+		return new Builder(testData);
+	}
+	
 	public List<IMetric> getMetrics() {
 		return metrics;
 	}
@@ -82,24 +89,44 @@ public class Config {
 		return testData;
 	}
 
-	public int getRepetitions() {
-		return repetitions;
+	public int getInner() {
+		return inner;
 	}
-	
 
-	public static class Builder {
+	public int getOuter() {
+		return outer;
+	}
+
+	public Format getFormat() {
+		return format;
+	}
+
+	public static String getTestDataPath() {
+		return testDataPath;
+	}
+
+
+	public static final class Builder {
 		
 		private final File testData;
-		private int repetitions = 100;
+		private int inner = 100;
+		private int outer = 30;
 		private Format format;
 
 		public Builder(File testData) {
 			this.testData = testData;
 		}
 
-		public Builder repetitions(Integer repetitions) {
-			if (repetitions != null && repetitions >= 1) {
-				this.repetitions = repetitions;
+		public Builder inner(Integer inner) {
+			if (inner != null && inner >= 1) {
+				this.inner = inner;
+			}
+			return this;
+		}
+		
+		public Builder outer(Integer outer) {
+			if (outer != null && outer >= 1) {
+				this.outer = outer;
 			}
 			return this;
 		}

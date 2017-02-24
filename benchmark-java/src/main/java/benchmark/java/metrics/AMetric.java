@@ -20,7 +20,7 @@ public abstract class AMetric implements IMetric {
 
 
 	@Override
-	public MetricResult run(Object testData, File testDataFile, int repetitions) {
+	public MetricResult run(Object testData, File testDataFile, int inner, int outer) {
 		
 		this.testData = testData;
 		this.testDataFile = testDataFile;
@@ -39,9 +39,9 @@ public abstract class AMetric implements IMetric {
 			boolean outputS = serialize(dataForSerialize, output);
 			
 			if(outputS) {
-				for (int j = 0; j < OUTER_REPETITION; j++){
+				for (int j = 0; j < outer; j++){
 					start = System.nanoTime();
-					for (int i = 0; i < repetitions; i++) {
+					for (int i = 0; i < inner; i++) {
 						serialize(dataForSerialize, new ByteArrayOutputStream());
 					}
 					time = System.nanoTime() - start;
@@ -66,9 +66,9 @@ public abstract class AMetric implements IMetric {
 			// Do it once to warm up.
 			Object outputD = deserialize(new ByteArrayInputStream(dataForDeserialize), dataForDeserialize);
 			if (outputD != null){
-				for (int j = 0; j < OUTER_REPETITION; j++) {
+				for (int j = 0; j < outer; j++) {
 					start = System.nanoTime();
-					for (int i = 0; i < repetitions; i++) {
+					for (int i = 0; i < inner; i++) {
 						deserialize(new ByteArrayInputStream(dataForDeserialize), dataForDeserialize);
 					}
 					time = System.nanoTime() - start;

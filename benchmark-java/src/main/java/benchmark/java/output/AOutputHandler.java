@@ -1,6 +1,5 @@
 package benchmark.java.output;
 
-import benchmark.java.metrics.IMetric;
 import benchmark.java.metrics.MetricResult;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -11,7 +10,16 @@ import java.util.List;
 
 
 public abstract class AOutputHandler implements IOutputHandler {
+	
+	protected final int outer;
 
+	
+	public AOutputHandler(int outer) {
+		this.outer = outer;
+	}
+
+	
+	
 	@Override
 	public void handleBenchmarkResult(List<MetricResult> result) {
 		
@@ -56,7 +64,7 @@ public abstract class AOutputHandler implements IOutputHandler {
 		List<List<String>> rowsSerialize = new ArrayList<>();
 		List<List<String>> rowsDeserialize = new ArrayList<>();
 
-		for (int i = 0; i < IMetric.OUTER_REPETITION; i++) {
+		for (int i = 0; i < outer; i++) {
 			List<String> rowSerialize = new ArrayList<>();
 			List<String> rowDeserialize = new ArrayList<>();
 			for (MetricResult metricResult : result) {

@@ -14,6 +14,12 @@ import java.util.Map;
 public class ConsoleOutput extends AOutputHandler {
 
 	public static PrintStream printStream = System.out;
+
+	public ConsoleOutput(int outer) {
+		super(outer);
+	}
+	
+	
 	
 	
 	@Override

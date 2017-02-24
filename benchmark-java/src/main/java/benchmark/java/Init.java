@@ -30,8 +30,8 @@ public class Init {
 			CommandLine cmd = parser.parse(options, args);
 
 			String output = OUTPUT_CONSOLE;
-			if (cmd.hasOption("o")) {
-				String outputGiven = cmd.getOptionValue("o");
+			if (cmd.hasOption("r")) {
+				String outputGiven = cmd.getOptionValue("r");
 				if (Arrays.asList(outputs).contains(outputGiven)) {
 					output = outputGiven;
 				} else {
@@ -60,17 +60,32 @@ public class Init {
 				}
 			}
 
-			Integer repetitions = null;
-			if (cmd.hasOption("r")) {
-				String repGiven = cmd.getOptionValue("r");
+			Integer inner = null;
+			if (cmd.hasOption("i")) {
+				String repGiven = cmd.getOptionValue("i");
 				try {
-					repetitions = Integer.valueOf(repGiven);
-					if (repetitions < 1) {
-						System.err.println("Repetitions must be whole number greater than zero.");
+					inner = Integer.valueOf(repGiven);
+					if (inner < 1) {
+						System.err.println("Number of inner repetitions must be whole number greater than zero.");
 						System.exit(1);
 					}
 				} catch (NumberFormatException ex) {
-					System.err.println("Repetitions must be whole number greater than zero.");
+					System.err.println("Number of inner repetitions must be whole number greater than zero.");
+					System.exit(1);
+				}
+			}
+			
+			Integer outer = null;
+			if (cmd.hasOption("o")) {
+				String repGiven = cmd.getOptionValue("o");
+				try {
+					outer = Integer.valueOf(repGiven);
+					if (outer < 1) {
+						System.err.println("Number of outer repetitions must be whole number greater than zero.");
+						System.exit(1);
+					}
+				} catch (NumberFormatException ex) {
+					System.err.println("Number of outer repetitions must be whole number greater than zero.");
 					System.exit(1);
 				}
 			}
@@ -86,8 +101,9 @@ public class Init {
 			}
 
 			
-			Config config = new Config.Builder(testDataFile)
-					.repetitions(repetitions)
+			Config config = Config.newBuilder(testDataFile)
+					.outer(outer)
+					.inner(inner)
 					.format(format)
 					.build();
 
@@ -95,10 +111,10 @@ public class Init {
 			IOutputHandler outputHandler;
 			switch (output) {
 				case OUTPUT_CSV:
-					outputHandler = new CsvOutput(outputDir);
+					outputHandler = new CsvOutput(config.getOuter(), outputDir);
 					break;
 				default:
-					outputHandler = new ConsoleOutput();
+					outputHandler = new ConsoleOutput(config.getOuter());
 			}
 			Benchmark benchmark = new Benchmark(config, outputHandler);
 			benchmark.run();
@@ -118,19 +134,26 @@ public class Init {
 		
 		Options options = new Options();
 		
-		Option outputOption = Option.builder("o")
+		Option outputOption = Option.builder("r")
 				.hasArg()
-				.argName("output")
+				.argName("result")
 				.desc("You can choose from several choices: " + String.join(", ", outputs))
 				.build();
 		options.addOption(outputOption);
 		
-		Option repOption = Option.builder("r")
+		Option innerOption = Option.builder("i")
 				.hasArg()
-				.argName("repetitions")
-				.desc("Number of repetitions.")
+				.argName("inner")
+				.desc("Number of inner repetitions.")
 				.build();
-		options.addOption(repOption);
+		options.addOption(innerOption);
+		
+		Option outerOption = Option.builder("o")
+				.hasArg()
+				.argName("outer")
+				.desc("Number of outer repetitions.")
+				.build();
+		options.addOption(outerOption);
 		
 		Option dataOption = Option.builder("t")
 				.hasArg()
@@ -140,7 +163,8 @@ public class Init {
 		options.addOption(dataOption);
 		
 		Option formatOption = Option.builder("f")
-				//.hasArg()
+				.hasArg()
+				.optionalArg(true)
 				.argName("format")
 				.desc("Run benchmark for specific format only.")
 				.build();
