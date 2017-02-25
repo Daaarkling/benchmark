@@ -46,8 +46,8 @@ done
 
 # ------------------
 # Run docker
-# ------------------:"$version"-cli
-docker run --rm -it -v "$PWD:/opt/benchmark" -w /opt/benchmark benchmark-php \
+# ------------------
+docker run --rm -it -v "$PWD:/opt/benchmark" -w /opt/benchmark darkling/benchmark-php:"$version" \
 	sh -c " 
 		composer install && \
 		composer update && \
