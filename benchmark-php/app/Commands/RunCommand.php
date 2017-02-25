@@ -29,7 +29,7 @@ class RunCommand extends Command
 			->addOption('outer', 'o', InputOption::VALUE_REQUIRED, 'Number of outer repetitions')
 			->addOption('inner', 'i', InputOption::VALUE_REQUIRED, 'Number of inner repetitions')
 			->addOption('result', 'r', InputOption::VALUE_REQUIRED, 'Set output. You can choose from several choices: ' . implode(', ', self::OUTPUTS) . '.', 'console')
-			->addOption('format', 'f', InputOption::VALUE_OPTIONAL, 'Run benchmark for specific format only.')
+			->addOption('format', 'f', InputOption::VALUE_REQUIRED, 'Run benchmark for specific format only.')
 			->addOption('out-dir', 'd', InputOption::VALUE_REQUIRED, 'Output directory.');
 	}
 
