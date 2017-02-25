@@ -13,7 +13,7 @@ cli.option("-r, --result <s>", "Handle output, you can choose from several choic
 	.option("-t --test-data <s>", "Path to test data.")
 	.option("-i, --inner <n>", "Number of inner repetitions.")
 	.option("-o, --outer <n>", "Number of outer repetitions.")
-  	.option("-f, --format [s]", "Run benchmark for specific format only.")
+  	.option("-f, --format <s>", "Run benchmark for specific format only.")
   	.parse(process.argv);
 
 
@@ -72,7 +72,7 @@ if(cli.inner) {
 	}
 }
 
-if(cli.format && cli.format != true) {
+if(cli.format) {
 	if (formats.includes(cli.format)) {
 		config.format = cli.format;
 	} else {

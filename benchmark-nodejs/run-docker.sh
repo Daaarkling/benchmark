@@ -2,12 +2,12 @@
 
 
 # ------------------
-# Set default options
+# Init vars
 # ------------------
-version="7.5"
-outer=30
-inner=100
-result="csv"
+version="7.6"
+result="-r csv"
+outer=
+inner=
 format=
 
 
@@ -18,19 +18,19 @@ while [ "$1" != "" ]; do
 	case $1 in
 		-o | --outer )		
 			shift
-			outer="$1"
+			outer="-o $1"
 			;;
 		-i | --inner )		
 			shift
-			inner="$1"
+			inner="-i $1"
 			;;
 		-f | --format )  			
 			shift  
-			format="$1"
+			format="-f $1"
 			;;
 		-r | --result )  				
 			shift
-			result="$1"
+			result="-r $1"
 			;;
 		-v | --version )  				
 			shift
@@ -48,6 +48,8 @@ done
 # Run docker
 # ------------------
 docker run --rm -it -v "$PWD:/opt/benchmark" -w /opt/benchmark node:"$version" \
-	sh -c "
+	sh -c " 
 		npm rebuild && \
-		node init.js -r $result -f $format -o $outer -i $inner -d ./"
+		npm install && \
+		node init.js $result $outer $inner $format -d ./"
+
