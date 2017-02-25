@@ -10,10 +10,9 @@ formatOptions=("native" "json" "xml" "protobuf" "msgpack" "avro")
 format=
 languageOptions=("php" "java" "nodejs")
 language=
-repetition=100
+outer="-o 30"
+inner="-i 100"
 outDir="./"
-testDataOptions=("small" "big")
-testData=$(readlink -f "./testdata/test_data_${testDataOptions[0]}.json")
 summarizeSerializeTemp=
 summarizeDeserializeTemp=
 sizeTemp=
@@ -40,7 +39,7 @@ function setFormat () {
 	do
 		if [ "$i" = "$1" ]
 		then
-			format=$1
+			format="-f $1"
 			return	
 		fi
 		formatString="$formatString $i"
@@ -62,31 +61,21 @@ function setLanguage () {
 	error "Language must be one of these options: $languageString"
 }
 
-function setData () {
-	testDataString=
-	for i in ${testDataOptions[@]}
-	do
-		if [ "$i" = "$1" ]
-		then
-			testData=$(readlink -f "./testdata/test_data_$1.json")
-			if [ -f "$testData" ] && [ -r "$testData" ]
-			then
-				return
-			else
-				error "Test data file $testData not found."
-			fi
-		fi
-		testDataString="$testDataString $i"
-	done
-	error "Test data must be one of these options: $testDataString"
-}
-
-function setRepetition () {
+function setOuter () {
 	if [ $1 -gt 0 ]
 	then
-		repetition=$1
+		outer="-o $1"
 	else
-		error "repetition must be greater then zero."
+		error "Number of outer repetitions must be greater then zero."
+	fi
+}
+
+function setInner () {
+	if [ $1 -gt 0 ]
+	then
+		inner="-i $1"
+	else
+		error "Number of inner repetitions must be greater then zero."
 	fi
 }
 
@@ -110,35 +99,42 @@ function printHelp () {
 # ------------------
 function runBenchmarks () {
 
-	runDocker "darkling/benchmark-nodejs:7.5" "nodejs"
-	exit 0
+	# php
+	docker run --rm -it -v "$PWD/benchmark-php:/opt/benchmark" -w /opt/benchmark darkling/benchmark-php:7.1 \
+	sh -c " 
+		composer install && \
+		composer update && \
+		php -d memory-limit=256 init.php b:r -r csv $outer $inner $format -d ./"
 
+	$(mv ./benchmark-php/php-serialize.csv $outDir)
+	$(mv ./benchmark-php/php-deserialize.csv $outDir)
+	$(mv ./benchmark-php/php-summarize.csv $outDir)
+	$(mv ./benchmark-php/php-info.txt $outDir)
 	
+	# nodeJS
+	docker run --rm -it -v "$PWD/benchmark-nodejs:/opt/benchmark" -w /opt/benchmark node:7.6 \
+	sh -c " 
+		npm rebuild && \
+		npm install && \
+		node init.js -r csv $outer $inner $format -d ./"
+
+	$(mv ./benchmark-nodejs/nodejs-serialize.csv $outDir)
+	$(mv ./benchmark-nodejs/nodejs-deserialize.csv $outDir)
+	$(mv ./benchmark-nodejs/nodejs-summarize.csv $outDir)
+	$(mv ./benchmark-nodejs/nodejs-info.txt $outDir)
 	
-	if [ "$format" != "" ]
-	then
-		php ./benchmark-php/init.php b:r -o csv -r "$repetition" -d "$outDir" -f "$format" -t "$testData" > /dev/null
-		java -jar benchmark-java/target/benchmark-java-1.0-jar-with-dependencies.jar -o csv -r "$repetition" -d "$outDir" -f "$format" -t "$testData" > /dev/null
-		#node ./benchmark-nodejs/init.js -o csv -r "$repetition" -d "$outDir" -f "$format" -t "$testData" > /dev/null
-	else
-		php ./benchmark-php/init.php b:r -o csv -r "$repetition" -d "$outDir" -t "$testData" > /dev/null
-		java -jar benchmark-java/target/benchmark-java-1.0-jar-with-dependencies.jar -o csv -r "$repetition" -d "$outDir" -t "$testData" > /dev/null
-		node ./benchmark-nodejs/init.js -o csv -r "$repetition" -d "$outDir" -t "$testData" > /dev/null
-	fi
+	# java
+	docker run --rm -it -v "$PWD/benchmark-java:/opt/benchmark" -w /opt/benchmark darkling/benchmark-java:8 \
+	sh -c " 
+		mvn package && \
+		java -jar target/benchmark-java-1.0-jar-with-dependencies.jar -r csv $outer $inner $format -d ./"
+
+	$(mv ./benchmark-java/java-serialize.csv $outDir)
+	$(mv ./benchmark-java/java-deserialize.csv $outDir)
+	$(mv ./benchmark-java/java-summarize.csv $outDir)
+	$(mv ./benchmark-java/java-info.txt $outDir)
 }
 
-# --------------------------------
-# Run specific benchmark in docker
-# --------------------------------
-function runDocker() {
-
-	$(docker run -i --name benchmark -e "repetition=$repetition" -e "format=$format" $1 > /dev/null)
-	$(docker cp benchmark:/opt/benchmark/benchmark-nodejs/output/${2}-serialize.csv $outDir)
-	$(docker cp benchmark:/opt/benchmark/benchmark-nodejs/output/${2}-deserialize.csv $outDir)
-	$(docker cp benchmark:/opt/benchmark/benchmark-nodejs/output/${2}-summarize.csv $outDir)
-	$(docker cp benchmark:/opt/benchmark/benchmark-nodejs/output/${2}-info.txt $outDir)
-	$(docker rm benchmark > /dev/null)
-}
 
 # ----------------------------------------------
 # Create combined file & temp files for box plot
@@ -149,7 +145,9 @@ function preprocessBarOutput () {
 	javaCsv="${outDir}java-summarize.csv"
 	nodeCsv="${outDir}nodejs-summarize.csv"
 	
-	if [ -r "$phpCsv" ] && [ -r "$javaCsv" ] && [ -r "$nodeCsv" ]
+	if [ -r "$phpCsv" ] && 
+	[ -r "$javaCsv" ] && 
+	[ -r "$nodeCsv" ]
 	then
 		# create combined file
 		combined="${outDir}combined-summarize.csv"
@@ -320,32 +318,39 @@ function plotBox () {
 # ------------------
 while [ "$1" != "" ]; do
 	case $1 in
-		-r | --repetition )		shift
-									setRepetition $1
-									;;
-		-d | --out-dir )  			shift
-									setOutDir $1
-		                        	;;
-		-f | --format )  			shift  
-									setFormat $1
-		                        	;;
-		-l | --language )  			shift  
-									setLanguage $1
-		                        	;;
-		-t | --data )  				shift
-									setData $1
-		                        	;;
-		-h | --help )           	printHelp	
-		                        	;;
-		* )                     	error "Unknown argument $1"
+		-o | --outer )		
+			shift
+			setOuter $1
+			;;
+		-i | --inner )		
+			shift
+			setInner $1
+			;;
+		-d | --out-dir )  			
+			shift
+			setOutDir $1
+		    ;;
+		-f | --format )  			
+			shift  
+			setFormat $1
+			;;
+		-l | --language )  			
+			shift  
+			setLanguage $1
+			;;
+		-h | --help )           	
+			printHelp	
+			;;
+		* )                     	
+			error "Unknown argument $1"
     	esac
 	shift
 done
 
 # let's do it
 runBenchmarks
-#plotBar
-#plotBox
+plotBar
+plotBox
 
 echo ""
 echo "Benchmark run successfully!"

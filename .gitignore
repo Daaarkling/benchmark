@@ -1,5 +1,4 @@
 benchmark-php/vendor/*
-benchmark-php/output/*
 benchmark-php/testdata/test_data_huge.json
 benchmark-php/composer.lock
 
@@ -8,6 +7,6 @@ benchmark-java/target
 benchmark-java/nb-configuration.xml
 benchmark-java/nbactions.xml
 
-benchmark-nodejs/node_modules/*
+benchmark-nodejs/node_modules
 
 .idea
