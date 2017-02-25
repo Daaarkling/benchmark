@@ -51,7 +51,7 @@ public class Init {
 			}
 			
 			Config.Format format = null;
-			if (cmd.hasOption("f") && cmd.getOptionValue("f") != null) {
+			if (cmd.hasOption("f")) {
 				String formatGiven = cmd.getOptionValue("f");
 				format = Config.Format.getByName(formatGiven);
 				if (format == null) {
@@ -164,7 +164,6 @@ public class Init {
 		
 		Option formatOption = Option.builder("f")
 				.hasArg()
-				.optionalArg(true)
 				.argName("format")
 				.desc("Run benchmark for specific format only.")
 				.build();
