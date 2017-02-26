@@ -24,15 +24,6 @@ combinedDeserialize=
 # ------------------
 # Validation
 # ------------------
-function setOutDir () {
-	if [ -d "$1" ] && [ -w "$1" ]
-	then
-		outDir=$1
-	else
-		error "Output path is not a directory or is not writable."
-	fi
-}
-
 function setFormat () {
 	formatString=
 	for i in ${formatOptions[@]}
@@ -94,6 +85,17 @@ function printHelp () {
 	exit 0
 }
 
+
+# -----------------------
+# Create output directory
+# -----------------------
+function createOutDir () {
+	
+	outDir="output-"$(date +%Y%m%d-%H%M%S)
+	mkdir $outDir
+	outDir="${outDir}/"
+}
+
 # ------------------
 # Run benchmarks
 # ------------------
@@ -104,7 +106,7 @@ function runBenchmarks () {
 	sh -c " 
 		composer install && \
 		composer update && \
-		php -d memory-limit=256 init.php b:r -r csv $outer $inner $format -d ./"
+		php -d memory-limit=-1 init.php b:r -r csv $outer $inner $format -d ./"
 
 	$(mv ./benchmark-php/php-serialize.csv $outDir)
 	$(mv ./benchmark-php/php-deserialize.csv $outDir)
@@ -140,31 +142,32 @@ function runBenchmarks () {
 # Create combined file & temp files for box plot
 # ----------------------------------------------
 function preprocessBarOutput () {
+
+	# create combined file
+	combined="${outDir}combined-summarize.csv"
+	i=0
+	for f in ${outDir}*-summarize.csv
+	do 
+		if [ "$f" != "$combined" ]
+			then 
+			if [ $i -eq 0 ]
+			then
+				$(head -1  $f > $combined)
+			fi
+			$(tail -n+2  $f >> $combined)
+			((i++))
+		fi
+	done
 	
-	phpCsv="${outDir}php-summarize.csv"
-	javaCsv="${outDir}java-summarize.csv"
-	nodeCsv="${outDir}nodejs-summarize.csv"
+	# create temp files
+	summarizeSerializeTemp=$(mktemp /tmp/benchmark-serialize.csv.XXXXXX)
+	$(tail -n+2 $combined | awk -F";" '$2 != 0 {gsub("\"","", $2); print $1";"$2}' | sort -t";" -nk2 > $summarizeSerializeTemp)
 	
-	if [ -r "$phpCsv" ] && 
-	[ -r "$javaCsv" ] && 
-	[ -r "$nodeCsv" ]
-	then
-		# create combined file
-		combined="${outDir}combined-summarize.csv"
-		$(cat $phpCsv <(tail -n+2 $javaCsv) <(tail -n+2 $nodeCsv) > $combined)
+	summarizeDeserializeTemp=$(mktemp /tmp/benchmark-deserialize.csv.XXXXXX)
+	$(tail -n+2 $combined | awk -F";" '$3 != 0 {gsub("\"","", $3); print $1";"$3}' | sort -t";" -nk2 > $summarizeDeserializeTemp)
 	
-		# create temp files
-		summarizeSerializeTemp=$(mktemp /tmp/benchmark-serialize.csv.XXXXXX)
-		$(tail -n+2 $combined | awk -F";" '$2 != 0 {gsub("\"","", $2); print $1";"$2}' | sort -t";" -nk2 > $summarizeSerializeTemp)
-		
-		summarizeDeserializeTemp=$(mktemp /tmp/benchmark-deserialize.csv.XXXXXX)
-		$(tail -n+2 $combined | awk -F";" '$3 != 0 {gsub("\"","", $3); print $1";"$3}' | sort -t";" -nk2 > $summarizeDeserializeTemp)
-		
-		sizeTemp=$(mktemp /tmp/benchmark-size.csv.XXXXXX)
-		$(tail -n+2 $combined | awk -F";" '$4 != 0 {gsub("\"","", $4); print $1";"$4}' | sort -t";" -nk2 > $sizeTemp)
-	else
-		error "Output files were not found or not readable."
-	fi
+	sizeTemp=$(mktemp /tmp/benchmark-size.csv.XXXXXX)
+	$(tail -n+2 $combined | awk -F";" '$4 != 0 {gsub("\"","", $4); print $1";"$4}' | sort -t";" -nk2 > $sizeTemp)
 }
 
 
@@ -240,31 +243,29 @@ function plotBar () {
 # ----------------------------------------------
 function preprocessBoxOutput () {
 	
-	phpSerializeCsv="${outDir}php-serialize.csv"
-	phpDeserializeCsv="${outDir}php-deserialize.csv"
-	
-	javaSerializeCsv="${outDir}java-serialize.csv"
-	javaDeserializeCsv="${outDir}java-deserialize.csv"
-	
-	nodeSerializeCsv="${outDir}nodejs-serialize.csv"
-	nodeDeserializeCsv="${outDir}nodejs-deserialize.csv"
+	# Serialize
+	combinedSerialize="${outDir}combined-serialize.csv"
+	serializeFiles=
+	for f in ${outDir}*-serialize.csv
+	do
+		if [ "$f" != "$combinedSerialize" ]
+		then
+			serializeFiles="$serializeFiles $f"
+		fi
+	done
+	$(paste -d";" $serializeFiles > $combinedSerialize)
 
-	if [ -r "$phpSerializeCsv" ] && 
-	[ -r "$phpDeserializeCsv" ] && 
-	[ -r "$javaSerializeCsv" ] && 
-	[ -r "$javaDeserializeCsv" ] && 
-	[ -r "$nodeSerializeCsv" ] && 
-	[ -r "$nodeDeserializeCsv" ]
-	then
-		# create combined files
-		combinedSerialize="${outDir}combined-serialize.csv"
-		$(paste -d";" $phpSerializeCsv $javaSerializeCsv $nodeSerializeCsv > $combinedSerialize)
-		
-		combinedDeserialize="${outDir}combined-deserialize.csv"
-		$(paste -d";" $phpDeserializeCsv $javaDeserializeCsv $nodeDeserializeCsv > $combinedDeserialize)
-	else
-		error "Output files were not found or not readable."
-	fi
+	# Deserialize
+	combinedDeserialize="${outDir}combined-deserialize.csv"
+	deserializeFiles=
+	for f in ${outDir}*-deserialize.csv
+	do
+		if [ "$f" != "$combinedDeserialize" ]
+		then
+			deserializeFiles="$deserializeFiles $f"
+		fi
+	done
+	$(paste -d";" $deserializeFiles > $combinedDeserialize)
 }
 
 
@@ -326,10 +327,6 @@ while [ "$1" != "" ]; do
 			shift
 			setInner $1
 			;;
-		-d | --out-dir )  			
-			shift
-			setOutDir $1
-		    ;;
 		-f | --format )  			
 			shift  
 			setFormat $1
@@ -347,13 +344,19 @@ while [ "$1" != "" ]; do
 	shift
 done
 
-# let's do it
-runBenchmarks
-plotBar
-plotBox
 
-echo ""
-echo "Benchmark run successfully!"
-echo ""
-
-exit 0
+# ------------------
+# Let's do it
+# ------------------
+function init () {
+	createOutDir
+	runBenchmarks
+	plotBar
+	plotBox
+	
+	echo ""
+	echo "Benchmark run successfully!"
+	echo ""
+	exit 0
+}
+init
