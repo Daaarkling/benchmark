@@ -119,7 +119,7 @@ public class Init {
 			Benchmark benchmark = new Benchmark(config, outputHandler);
 			benchmark.run();
 
-			System.out.println("Benchmark processed successfully!");
+			System.out.println("Java benchmark processed successfully!");
 			
 		} catch (ParseException exp) {
 			// oops, something went wrong

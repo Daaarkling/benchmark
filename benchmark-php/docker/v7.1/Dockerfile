@@ -4,7 +4,8 @@ FROM php:7.1-cli
 RUN apt-get update && apt-get install -y --no-install-recommends \ 
 	curl \ 
 	zip \
-	unzip
+	unzip \
+	git
 
 
 # Install composer 
@@ -24,3 +25,21 @@ RUN mkdir -p /tmp/protobuf \
     && docker-php-ext-configure /tmp/protobuf \
     && docker-php-ext-install /tmp/protobuf \
     && rm -r /tmp/protobuf
+ 
+
+# Set memory_limit = -1
+ADD php.ini /usr/local/etc/php
+
+
+WORKDIR /opt
+
+
+# COPY or ADD can't be used with ../ -> Forbidden path outside the build context
+# therefore git is used
+RUN git clone https://github.com/Daaarkling/benchmark.git
+
+
+WORKDIR	benchmark/benchmark-php
+
+
+RUN composer install

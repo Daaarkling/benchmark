@@ -110,5 +110,5 @@ if(cli.result === "csv" && cli.outDir) {
 // run
 benchmark.run(config);
 
-console.log("\n Benchmark processed successfully!\n ");
+console.log("\nNodeJS benchmark processed successfully!\n");
 

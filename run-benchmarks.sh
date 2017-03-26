@@ -93,7 +93,7 @@ function createOutDir () {
 	
 	outDir="output-"$(date +%Y%m%d-%H%M%S)
 	mkdir $outDir
-	outDir="${outDir}/"
+	outDir="${PWD}/${outDir}/"
 }
 
 # ------------------
@@ -101,40 +101,43 @@ function createOutDir () {
 # ------------------
 function runBenchmarks () {
 
-	# php
-	docker run --rm -it -v "$PWD/benchmark-php:/opt/benchmark" -w /opt/benchmark darkling/benchmark-php:7.1 \
-	sh -c " 
-		composer install && \
-		composer update && \
-		php -d memory-limit=-1 init.php b:r -r csv $outer $inner $format -d ./"
+	executed=false
 
-	$(mv ./benchmark-php/php-serialize.csv $outDir)
-	$(mv ./benchmark-php/php-deserialize.csv $outDir)
-	$(mv ./benchmark-php/php-summarize.csv $outDir)
-	$(mv ./benchmark-php/php-info.txt $outDir)
+	# php
+	if [[ "$(docker images -q darkling/benchmark-php:7.1 2> /dev/null)" != "" ]]
+	then
+		docker run --rm -it -v "$outDir:/opt/output" darkling/benchmark-php:7.1 \
+		sh -c " 
+			php init.php b:r -r csv $outer $inner $format -d /opt/output"
+			
+		executed=true
+	fi
 	
 	# nodeJS
-	docker run --rm -it -v "$PWD/benchmark-nodejs:/opt/benchmark" -w /opt/benchmark node:7.6 \
-	sh -c " 
-		npm rebuild && \
-		npm install && \
-		node init.js -r csv $outer $inner $format -d ./"
-
-	$(mv ./benchmark-nodejs/nodejs-serialize.csv $outDir)
-	$(mv ./benchmark-nodejs/nodejs-deserialize.csv $outDir)
-	$(mv ./benchmark-nodejs/nodejs-summarize.csv $outDir)
-	$(mv ./benchmark-nodejs/nodejs-info.txt $outDir)
+	if [[ "$(docker images -q darkling/benchmark-nodejs:7.7 2> /dev/null)" != "" ]]
+	then
+		docker run --rm -it -v "$outDir:/opt/output" darkling/benchmark-nodejs:7.7 \
+		sh -c " 
+			node init.js -r csv $outer $inner $format -d /opt/output"
+		
+		executed=true
+	fi
 	
 	# java
-	docker run --rm -it -v "$PWD/benchmark-java:/opt/benchmark" -w /opt/benchmark darkling/benchmark-java:8 \
-	sh -c " 
-		mvn package && \
-		java -jar target/benchmark-java-1.0-jar-with-dependencies.jar -r csv $outer $inner $format -d ./"
-
-	$(mv ./benchmark-java/java-serialize.csv $outDir)
-	$(mv ./benchmark-java/java-deserialize.csv $outDir)
-	$(mv ./benchmark-java/java-summarize.csv $outDir)
-	$(mv ./benchmark-java/java-info.txt $outDir)
+	if [[ "$(docker images -q darkling/benchmark-java:8 2> /dev/null)" != "" ]]
+	then
+		docker run --rm -it -v "$outDir:/opt/output" darkling/benchmark-java:8 \
+		sh -c " 
+			java -jar target/benchmark-java-1.0-jar-with-dependencies.jar -r csv $outer $inner $format -d /opt/output"
+		
+		executed=true
+	fi
+	
+	
+	if [[ $executed == false ]]
+	then
+		error "Run 'build-docker.sh' script first."
+	fi
 }
 
 
@@ -204,7 +207,9 @@ function plotBar () {
 		set xtics right rotate by 45
 		set style fill solid border -1
 		
-		bgcolor(value) = (language=word(value, 1), language eq "php" ? 1 : language eq "java" ? 2 : 3)
+		#bgcolor(value) = (language=word(value, 1), language eq "php" ? "119,123,179" : language eq "java" ? "234,45,47" : "144,197,63")
+		rgb(r,g,b) = 65536 * int(r) + 256 * int(g) + int(b)
+		bgcolor(value) = (language=word(value, 1), language eq "php" ? rgb(119,123,179) : language eq "java" ? rgb(234,45,47) : 2)
 		
 		set ylabel "Time logarithmic (ms)"
 		unset key
@@ -351,8 +356,14 @@ done
 function init () {
 	createOutDir
 	runBenchmarks
-	plotBar
-	plotBox
+
+	if [[ "$(which gnuplot)" != "" ]]
+	then
+		plotBar
+		plotBox
+	else
+		echo "Gnuplot was not found. Please install it."
+	fi
 	
 	echo ""
 	echo "Benchmark run successfully!"

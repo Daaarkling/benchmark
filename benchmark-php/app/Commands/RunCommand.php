@@ -116,7 +116,7 @@ class RunCommand extends Command
 		$benchmark = new Benchmark($config, $outputHandler);
 		$benchmark->run();
 
-		$io->title('Benchmark processed successfully!');
+		$io->title('PHP benchmark processed successfully!');
 		return 0;
 	}
 }
