@@ -4,8 +4,8 @@
 namespace Benchmark;
 
 
+use Becnhmark\Logger\ILogger;
 use Benchmark\Converters\ArrayConverter;
-use Benchmark\Metrics\IMetric;
 use Benchmark\Output\IOutputHandler;
 
 class Benchmark
@@ -16,12 +16,16 @@ class Benchmark
 	/** @var IOutputHandler */
 	private $outputHandler;
 
+	/** @var ILogger */
+    private $logger;
 
-	public function __construct(Config $config, IOutputHandler $outputHandler)
+
+    public function __construct(Config $config, IOutputHandler $outputHandler, ILogger $logger = NULL)
 	{
 		$this->config = $config;
 		$this->outputHandler = $outputHandler;
-	}
+        $this->logger = $logger;
+    }
 
 
 	/**
@@ -37,13 +41,20 @@ class Benchmark
 
 		foreach ($this->config->getMetrics() as $metric){
 
+            if ($this->logger) {
+                $this->logger->startMessage($metric->getInfo());
+            }
 
 			// Run metric benchmark
-			$metricResult = $metric->run($data, $dataFile, $inner, Config::REPETITIONS_OUTER, $outer);
+			$metricResult = $metric->run($data, $dataFile, $inner, $outer);
 
-			if($metricResult === NULL){
+			if ($metricResult === NULL){
 				continue;
 			}
+
+			if ($this->logger) {
+			    $this->logger->endMessage($metric->getInfo());
+            }
 
 			$result[] = $metricResult;
 		}

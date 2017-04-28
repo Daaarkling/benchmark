@@ -30,7 +30,8 @@ class RunCommand extends Command
 			->addOption('inner', 'i', InputOption::VALUE_REQUIRED, 'Number of inner repetitions')
 			->addOption('result', 'r', InputOption::VALUE_REQUIRED, 'Set output. You can choose from several choices: ' . implode(', ', self::OUTPUTS) . '.', 'console')
 			->addOption('format', 'f', InputOption::VALUE_REQUIRED, 'Run benchmark for specific format only.')
-			->addOption('out-dir', 'd', InputOption::VALUE_REQUIRED, 'Output directory.');
+			->addOption('out-dir', 'd', InputOption::VALUE_REQUIRED, 'Output directory.')
+            ->addOption('chatty', 'c', InputOption::VALUE_NONE, 'Enable verbose (chatty) mode.');
 	}
 
 
@@ -103,8 +104,15 @@ class RunCommand extends Command
 			$outputDir = $input->getOption('out-dir');
 		}
 
-		$config = new Config($testData, $inner, $outer, $format);
 
+		// verbose mode
+		$logger = NULL;
+		if ($input->getOption('chatty')) {
+		    $logger = new ConsoleLogger($input, $output);
+        }
+
+
+		$config = new Config($testData, $inner, $outer, $format);
 
 		switch ($outputOption) {
 			case self::OUTPUT_CSV:
@@ -113,7 +121,7 @@ class RunCommand extends Command
 			default:
 				$outputHandler = new ConsoleOutput($outer, $input, $output);
 		}
-		$benchmark = new Benchmark($config, $outputHandler);
+		$benchmark = new Benchmark($config, $outputHandler, $logger);
 		$benchmark->run();
 
 		$io->title('PHP benchmark processed successfully!');

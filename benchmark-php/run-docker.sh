@@ -9,6 +9,7 @@ result="-r csv"
 outer=
 inner=
 format=
+chatty=
 
 
 # ------------------
@@ -32,6 +33,10 @@ while [ "$1" != "" ]; do
 			shift
 			result="-r $1"
 			;;
+		-c | --chatty )
+			shift
+			chatty="-c"
+			;;
 		-v | --version )  				
 			shift
 			version="$1"
@@ -51,5 +56,5 @@ docker run --rm -it -v "$PWD:/opt/benchmark" -w /opt/benchmark darkling/benchmar
 	sh -c " 
 		composer install && \
 		composer update && \
-		php init.php b:r $result $outer $inner $format -d ./"
+		php init.php b:r $result $outer $inner $format $chatty -d ./"
 
