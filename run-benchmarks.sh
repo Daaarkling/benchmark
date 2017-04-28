@@ -12,6 +12,7 @@ languageOptions=("php" "java" "nodejs")
 language=
 outer="-o 30"
 inner="-i 100"
+chatty=
 outDir="./"
 summarizeSerializeTemp=
 summarizeDeserializeTemp=
@@ -70,6 +71,11 @@ function setInner () {
 	fi
 }
 
+function setChatty () {
+
+	chatty="-c"
+}
+
 # ------------------
 # Print
 # ------------------
@@ -108,7 +114,7 @@ function runBenchmarks () {
 	then
 		docker run --rm -it -v "$outDir:/opt/output" darkling/benchmark-php:7.1 \
 		sh -c " 
-			php init.php b:r -r csv $outer $inner $format -d /opt/output"
+			php init.php b:r -r csv $outer $inner $format $chatty -d /opt/output"
 			
 		executed=true
 	fi
@@ -118,7 +124,7 @@ function runBenchmarks () {
 	then
 		docker run --rm -it -v "$outDir:/opt/output" darkling/benchmark-nodejs:7.7 \
 		sh -c " 
-			node init.js -r csv $outer $inner $format -d /opt/output"
+			node init.js -r csv $outer $inner $format $chatty -d /opt/output"
 		
 		executed=true
 	fi
@@ -128,7 +134,7 @@ function runBenchmarks () {
 	then
 		docker run --rm -it -v "$outDir:/opt/output" darkling/benchmark-java:8 \
 		sh -c " 
-			java -jar target/benchmark-java-1.0-jar-with-dependencies.jar -r csv $outer $inner $format -d /opt/output"
+			java -jar target/benchmark-java-1.0-jar-with-dependencies.jar -r csv $outer $inner $format $chatty -d /opt/output"
 		
 		executed=true
 	fi
@@ -335,6 +341,10 @@ while [ "$1" != "" ]; do
 		-f | --format )  			
 			shift  
 			setFormat $1
+			;;
+		-c | --chatty )
+			shift
+			setChatty
 			;;
 		-l | --language )  			
 			shift  
