@@ -21,6 +21,7 @@
     "js2xmlparser": "2.0.2",
     "json2csv": "^3.7.3",
     "jstoxml": "0.2.4",
+    "moment": "^2.18.1",
     "msgpack": "1.0.2",
     "msgpack-js": "0.3.0",
     "msgpack5": "3.4.1",

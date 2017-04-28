@@ -5,7 +5,7 @@ var metric = function(format, name, version, url, serialize, deserialize) {
 	this.version = version;
 	this.serialize = serialize;
 	this.deserialize = deserialize;
-}
+};
 
 
 metric.prototype.fullName = function() {

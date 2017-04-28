@@ -3,7 +3,7 @@ var path = require("path");
 var outputs = require("./outputs");
 
 
-exports.run = function(config) {
+exports.run = function(config, logger) {
 	
 	// find all libs
 	var metrics = [];
@@ -22,7 +22,15 @@ exports.run = function(config) {
 	// run benchmarks
 	result = [];
 	metrics.forEach((metric) => {
+		if (logger) {
+			logger.startMessage(metric.fullName());
+		}
+	
 		result.push(metric.run(config.testData, config.inner, config.outer));
+		
+		if (logger) {
+			logger.endMessage(metric.fullName());
+		}
 	});
 
 	

@@ -14,6 +14,7 @@ cli.option("-r, --result <s>", "Handle output, you can choose from several choic
 	.option("-i, --inner <n>", "Number of inner repetitions.")
 	.option("-o, --outer <n>", "Number of outer repetitions.")
   	.option("-f, --format <s>", "Run benchmark for specific format only.")
+	.option("-c, --chatty", "Enable verbose (chatty) mode.")
   	.parse(process.argv);
 
 
@@ -105,10 +106,14 @@ if(cli.result === "csv" && cli.outDir) {
 	}
 }
 
+var logger = null;
+if(cli.chatty) {
+	logger = require("./modules/logger/console-logger")
+}
 
 
 // run
-benchmark.run(config);
+benchmark.run(config, logger);
 
 console.log("\nNodeJS benchmark processed successfully!\n");
 
