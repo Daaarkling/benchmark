@@ -6,6 +6,7 @@
 # ------------------
 version="8"
 result="-r csv"
+chatty=
 outer=
 inner=
 format=
@@ -32,6 +33,10 @@ while [ "$1" != "" ]; do
 			shift
 			result="-r $1"
 			;;
+		-c | --chatty )  				
+			shift
+			chatty="-c"
+			;;
 		-v | --version )  				
 			shift
 			version="$1"
@@ -50,5 +55,5 @@ done
 docker run --rm -it -v "$PWD:/opt/benchmark" -w /opt/benchmark darkling/benchmark-java:"$version" \
 	sh -c " 
 		mvn package && \
-		java -jar target/benchmark-java-1.0-jar-with-dependencies.jar $result $outer $inner $format -d ./"
+		java -jar target/benchmark-java-1.0-jar-with-dependencies.jar $result $outer $inner $format $chatty -d ./"
 

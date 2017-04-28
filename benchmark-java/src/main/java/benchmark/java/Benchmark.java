@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import benchmark.java.converters.IDataConverter;
 import benchmark.java.converters.PojoConverter;
+import benchmark.java.logger.ILogger;
 import benchmark.java.metrics.IMetric;
 import benchmark.java.metrics.MetricResult;
 import benchmark.java.output.IOutputHandler;
@@ -23,6 +24,7 @@ public class Benchmark {
 	
 	protected Config config;
 	private IOutputHandler outputHandler;
+	private ILogger logger;
 
 	
 	public Benchmark(Config config, IOutputHandler outputHandler) {
@@ -30,6 +32,15 @@ public class Benchmark {
 		this.config = config;
 		this.outputHandler = outputHandler;
 	}
+	
+	public Benchmark(Config config, IOutputHandler outputHandler, ILogger logger) {
+
+		this.config = config;
+		this.outputHandler = outputHandler;
+		this.logger = logger;
+	}
+	
+	
 	
 	/**
 	 * Run benchmark
@@ -40,10 +51,19 @@ public class Benchmark {
 		List<MetricResult> result = new ArrayList<>();
 		
 		for (IMetric metric : config.getMetrics()) {
+			
+			if (logger != null) {
+				logger.startMessage(metric.getInfo());
+			}
+			
 			// run metric benchmark
 			MetricResult metricResult = metric.run(data, config.getTestData(), config.getInner(), config.getOuter());
 			if (metricResult != null) {
 				result.add(metricResult);
+			}
+			
+			if (logger != null) {
+				logger.endMessage(metric.getInfo());
 			}
 		}
 		

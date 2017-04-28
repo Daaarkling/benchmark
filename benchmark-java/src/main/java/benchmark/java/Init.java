@@ -1,5 +1,7 @@
 package benchmark.java;
 
+import benchmark.java.logger.ConsoleLogger;
+import benchmark.java.logger.ILogger;
 import benchmark.java.output.ConsoleOutput;
 import benchmark.java.output.CsvOutput;
 import benchmark.java.output.IOutputHandler;
@@ -99,7 +101,11 @@ public class Init {
 				System.err.println("Test data file not found.");
 				System.exit(1);
 			}
-
+			
+			ILogger logger = null;
+			if (cmd.hasOption("c")) {
+				logger = new ConsoleLogger(System.out);
+			}
 			
 			Config config = Config.newBuilder(testDataFile)
 					.outer(outer)
@@ -116,7 +122,7 @@ public class Init {
 				default:
 					outputHandler = new ConsoleOutput(config.getOuter());
 			}
-			Benchmark benchmark = new Benchmark(config, outputHandler);
+			Benchmark benchmark = new Benchmark(config, outputHandler, logger);
 			benchmark.run();
 
 			System.out.println("Java benchmark processed successfully!");
@@ -136,45 +142,51 @@ public class Init {
 		
 		Option outputOption = Option.builder("r")
 				.hasArg()
-				.argName("result")
+				.longOpt("result")
 				.desc("You can choose from several choices: " + String.join(", ", outputs))
 				.build();
 		options.addOption(outputOption);
 		
 		Option innerOption = Option.builder("i")
 				.hasArg()
-				.argName("inner")
+				.longOpt("inner")
 				.desc("Number of inner repetitions.")
 				.build();
 		options.addOption(innerOption);
 		
 		Option outerOption = Option.builder("o")
 				.hasArg()
-				.argName("outer")
+				.longOpt("outer")
 				.desc("Number of outer repetitions.")
 				.build();
 		options.addOption(outerOption);
 		
 		Option dataOption = Option.builder("t")
 				.hasArg()
-				.argName("data")
+				.longOpt("data")
 				.desc("Test data.")
 				.build();
 		options.addOption(dataOption);
 		
 		Option formatOption = Option.builder("f")
 				.hasArg()
-				.argName("format")
+				.longOpt("format")
 				.desc("Run benchmark for specific format only.")
 				.build();
 		options.addOption(formatOption);
 		
 		Option outputDirOption = Option.builder("d")
 				.hasArg()
-				.argName("out-dir")
+				.longOpt("out-dir")
 				.desc("Output directory.")
 				.build();
 		options.addOption(outputDirOption);
+		
+		Option chattyOption = Option.builder("c")
+				.longOpt("chatty")
+				.desc("Enable verbose (chatty) mode.")
+				.build();
+		options.addOption(chattyOption);
 		
 		return options;
 	}
