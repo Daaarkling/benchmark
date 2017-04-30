@@ -10,7 +10,7 @@ formatOptions=("native" "json" "xml" "protobuf" "msgpack" "avro")
 format=
 languageOptions=("php" "java" "nodejs")
 language=
-outer="-o 30"
+outer="-o 50"
 inner="-i 100"
 chatty=
 outDir="./"
@@ -110,7 +110,7 @@ function runBenchmarks () {
 	executed=false
 
 	# php
-	if [[ "$(docker images -q darkling/benchmark-php:7.1 2> /dev/null)" != "" ]]
+	if [[ ("$language" == "php" || "$language" == "") && "$(docker images -q darkling/benchmark-php:7.1 2> /dev/null)" != "" ]]
 	then
 		docker run --rm -it -v "$outDir:/opt/output" darkling/benchmark-php:7.1 \
 		sh -c " 
@@ -120,7 +120,7 @@ function runBenchmarks () {
 	fi
 	
 	# nodeJS
-	if [[ "$(docker images -q darkling/benchmark-nodejs:7.7 2> /dev/null)" != "" ]]
+	if [[ ("$language" == "nodejs" || "$language" == "") && "$(docker images -q darkling/benchmark-nodejs:7.7 2> /dev/null)" != "" ]]
 	then
 		docker run --rm -it -v "$outDir:/opt/output" darkling/benchmark-nodejs:7.7 \
 		sh -c " 
@@ -130,7 +130,7 @@ function runBenchmarks () {
 	fi
 	
 	# java
-	if [[ "$(docker images -q darkling/benchmark-java:8 2> /dev/null)" != "" ]]
+	if [[ ("$language" == "java" || "$language" == "") && "$(docker images -q darkling/benchmark-java:8 2> /dev/null)" != "" ]]
 	then
 		docker run --rm -it -v "$outDir:/opt/output" darkling/benchmark-java:8 \
 		sh -c " 
@@ -353,7 +353,7 @@ while [ "$1" != "" ]; do
 			printHelp	
 			;;
 		* )                     	
-			error "Unknown argument $1"
+			error "Unknown option $1"
     	esac
 	shift
 done
