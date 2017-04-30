@@ -303,8 +303,7 @@ function plotBox () {
 		set datafile separator ";"
 		set xtics right rotate by 45
 		set grid y
-		set logscale y
-		set ylabel "Time logarithmic (ms)"
+		set ylabel "Time (ms)"
 		set lmargin 25
 		
 		set title "Serialize"
