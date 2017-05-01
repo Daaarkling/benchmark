@@ -158,12 +158,18 @@ function preprocessBarOutput () {
 	for f in ${outDir}*-summarize.csv
 	do 
 		if [ "$f" != "$combined" ]
-			then 
+		then 
 			if [ $i -eq 0 ]
 			then
 				$(head -1  $f > $combined)
 			fi
-			$(tail -n+2  $f >> $combined)
+			
+			$(tail -n+2 $f >> $combined)
+			
+			if [ $i -ne 0 ]
+			then
+				$(printf "\n" >> $combined)
+			fi
 			((i++))
 		fi
 	done
@@ -325,41 +331,6 @@ function plotBox () {
 
 
 # ------------------
-# Read options
-# ------------------
-while [ "$1" != "" ]; do
-	case $1 in
-		-o | --outer )		
-			shift
-			setOuter $1
-			;;
-		-i | --inner )		
-			shift
-			setInner $1
-			;;
-		-f | --format )  			
-			shift  
-			setFormat $1
-			;;
-		-c | --chatty )
-			shift
-			setChatty
-			;;
-		-l | --language )  			
-			shift  
-			setLanguage $1
-			;;
-		-h | --help )           	
-			printHelp	
-			;;
-		* )                     	
-			error "Unknown option $1"
-    	esac
-	shift
-done
-
-
-# ------------------
 # Let's do it
 # ------------------
 function init () {
@@ -379,4 +350,41 @@ function init () {
 	echo ""
 	exit 0
 }
+
+
+# ------------------
+# Read options
+# ------------------
+while [ "$1" != "" ]; do
+	case $1 in
+		-o | --outer )
+			shift
+			setOuter $1
+			;;
+		-i | --inner )
+			shift
+			setInner $1
+			;;
+		-f | --format )
+			shift
+			setFormat $1
+			;;
+		-c | --chatty )
+			shift
+			setChatty
+			;;
+		-l | --language )
+			shift
+			setLanguage $1
+			;;
+		-h | --help )
+			printHelp
+			;;
+		* )
+			error "Unknown option $1"
+    	esac
+	shift
+done
+
+# GO
 init
