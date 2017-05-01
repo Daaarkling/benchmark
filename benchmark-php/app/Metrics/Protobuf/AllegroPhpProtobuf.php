@@ -10,7 +10,7 @@ use Benchmark\Metrics\AMetric;
 use Benchmark\Metrics\Info;
 
 
-class AllegroPhpProtobuf extends AMetric
+class AllegroPhpProtobuf //extends AMetric
 {
 	/** @var  PersonCollection */
 	private $personCollection;
