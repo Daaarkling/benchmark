@@ -9,7 +9,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @CompiledJson
 @JsonObject(fieldDetectionPolicy = JsonObject.FieldDetectionPolicy.NONPRIVATE_FIELDS_AND_ACCESSORS)
 public class Friend implements Serializable {
-    
+	
+	private static final long serialVersionUID = 5926646671400759088L;
 	private int id;
     private String name;
 

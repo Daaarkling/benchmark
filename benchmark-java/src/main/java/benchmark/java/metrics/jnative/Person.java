@@ -1,19 +1,16 @@
 
-package benchmark.java.entities;
+package benchmark.java.metrics.jnative;
 
-import com.bluelinelabs.logansquare.annotation.JsonObject;
-import com.dslplatform.json.CompiledJson;
-import java.io.Serializable;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
-@CompiledJson
-@JsonObject(fieldDetectionPolicy = JsonObject.FieldDetectionPolicy.NONPRIVATE_FIELDS_AND_ACCESSORS)
-public class Person implements Serializable {
+public class Person implements Externalizable {
 	
-	private static final long serialVersionUID = 6696406574436517136L;
+	private static final long serialVersionUID = 1714900922255026924L;
     private String _id;
     private int index;
     private String guid;
@@ -37,6 +34,59 @@ public class Person implements Serializable {
     private String greeting;
     private String favoriteFruit;
 
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeObject(_id);
+		out.writeInt(index);
+		out.writeObject(guid);
+		out.writeBoolean(isActive);
+		out.writeObject(balance);
+		out.writeObject(picture);
+		out.writeInt(age);
+		out.writeObject(eyeColor);
+		out.writeObject(name);
+		out.writeObject(gender);
+		out.writeObject(company);
+		out.writeObject(email);
+		out.writeObject(phone);
+		out.writeObject(address);
+		out.writeObject(about);
+		out.writeObject(registered);
+		out.writeFloat(latitude);
+		out.writeFloat(longitude);
+		out.writeObject(tags);
+		out.writeObject(friends);
+		out.writeObject(greeting);
+		out.writeObject(favoriteFruit);
+	}
+
+	@Override
+	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+		_id = (String) in.readObject();
+		index = in.readInt();
+		guid = (String) in.readObject();
+		isActive = in.readBoolean();
+		balance = (String) in.readObject();
+		picture = (String) in.readObject();
+		age = in.readInt();
+		eyeColor = (String) in.readObject();
+		name = (String) in.readObject();
+		gender = (String) in.readObject();
+		company = (String) in.readObject();
+		email = (String) in.readObject();
+		phone = (String) in.readObject();
+		address = (String) in.readObject();
+		about = (String) in.readObject();
+		registered = (String) in.readObject();
+		latitude = in.readFloat();
+		longitude = in.readFloat();
+		tags = (List<String>) in.readObject();
+		friends = (List<Friend>) in.readObject();
+		greeting = (String) in.readObject();
+		favoriteFruit = (String) in.readObject();
+	}
+
+	
 	
 	public void addFriend(Friend friend) {	
 		friends.add(friend);

@@ -13,7 +13,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @CompiledJson
 @JsonObject(fieldDetectionPolicy = FieldDetectionPolicy.NONPRIVATE_FIELDS_AND_ACCESSORS)
 public class PersonCollection implements Serializable {
-    
+	
+	private static final long serialVersionUID = 7058184852008081269L;
+
 	private List<Person> persons = new ArrayList<>();
 
    
