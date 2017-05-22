@@ -17,7 +17,7 @@
         "fillup/array2xml": "0.5.1",
         "rybakit/msgpack": "0.2.1",
         "webmozart/json": "1.2",
-        "google/protobuf": "v3.1.0-alpha-1",
+        "google/protobuf": "v3.3.1",
         "seld/jsonlint": "1.5",
         "salsify/json-streaming-parser": "6.0"
     }

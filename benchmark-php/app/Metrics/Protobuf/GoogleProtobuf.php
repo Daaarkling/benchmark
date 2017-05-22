@@ -34,13 +34,13 @@ class GoogleProtobuf extends AMetric
 
 	public function serialize($data)
 	{
-		return $data->encode();
+		return $data->serializeToString();
 	}
 
 
 	public function deserialize($data)
 	{
-		$data = $this->personCollection->decode($data);
+		$data = $this->personCollection->mergeFromString($data);
 		return TRUE;
 	}
 }
