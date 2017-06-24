@@ -28,7 +28,7 @@ RUN mkdir -p /tmp/protobuf \
  
 
 # Set memory_limit = -1
-ADD php.ini /usr/local/etc/php
+COPY ./docker/v7.1/php.ini /usr/local/etc/php
 
 COPY ./ /opt/benchmark/benchmark-php
 

@@ -15,6 +15,13 @@ class AllegroPhpProtobuf //extends AMetric
 	/** @var  PersonCollection */
 	private $personCollection;
 
+    public function run($data, $dataFile, $inner = Config::REPETITIONS_INNER, $outer = Config::REPETITIONS_OUTER)
+    {
+        if (!extension_loaded('protobuf')) {
+            return NULL;
+        }
+    //    return parent::run($data, $dataFile, $inner, $outer);
+    }
 
 	public function getInfo()
 	{

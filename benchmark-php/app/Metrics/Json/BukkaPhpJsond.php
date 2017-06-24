@@ -10,6 +10,14 @@ use Benchmark\Metrics\Info;
 
 class BukkaPhpJsond extends AMetric
 {
+    public function run($data, $dataFile, $inner = Config::REPETITIONS_INNER, $outer = Config::REPETITIONS_OUTER)
+    {
+        if (!extension_loaded('jsond')) {
+            return NULL;
+        }
+        return parent::run($data, $dataFile, $inner, $outer);
+    }
+
 	public function getInfo()
 	{
 		return new Info(Config::FORMAT_JSON, 'bukka/php-jsond', 'https://github.com/bukka/php-jsond', '1.3.0');

@@ -20,7 +20,6 @@ interface IMetric
 	 * @param int $inner
 	 * @param int $outer
 	 * @return MetricResult
-	 * @internal param int $repetitions
 	 */
 	public function run($data, $dataFile, $inner = Config::REPETITIONS_INNER, $outer = Config::REPETITIONS_OUTER);
 }
