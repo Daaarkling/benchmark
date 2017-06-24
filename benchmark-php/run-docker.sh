@@ -13,23 +13,44 @@ chatty=
 
 
 # ------------------
+# Print help
+# ------------------
+function printHelp () {
+	printf "\nScript to run PHP benchmark via Docker.\n"
+	printf "\n\nOptions:\n"
+	printf "\t-h, --help:\t\t Print this very help.\n"
+	printf "\t-v, --version <s>:\t Run Docker image darkling/benchmark-php:{VERSION}.\n"
+	printf "\t-o, --outer <n>:\t Number of outer repetitions.\n"
+	printf "\t-i, --inner <n>:\t Number of inner repetitions.\n"
+	printf "\t-f, --format <s>:\t Run benchmark for specific format only.\n"
+	printf "\t-r, --result <s>:\t Handle output, you can choose from: csv or console.\n"
+	printf "\t-c, --chatty:\t\t Enable verbose (chatty) mode.\n\n"
+	exit 0
+}
+
+
+# ------------------
 # Read options
 # ------------------
 while [ "$1" != "" ]; do
 	case $1 in
-		-o | --outer )		
+		-h | --help )
+			shift
+			printHelp
+			;;
+		-o | --outer )
 			shift
 			outer="-o $1"
 			;;
-		-i | --inner )		
+		-i | --inner )
 			shift
 			inner="-i $1"
 			;;
-		-f | --format )  			
-			shift  
+		-f | --format )
+			shift
 			format="-f $1"
 			;;
-		-r | --result )  				
+		-r | --result )
 			shift
 			result="-r $1"
 			;;
@@ -37,11 +58,11 @@ while [ "$1" != "" ]; do
 			shift
 			chatty="-c"
 			;;
-		-v | --version )  				
+		-v | --version )
 			shift
 			version="$1"
 			;;
-		* )                     	
+		* )
 			echo "Unknown argument $1"
 			exit 1
     	esac
@@ -52,9 +73,6 @@ done
 # ------------------
 # Run docker
 # ------------------
-docker run --rm -it -v "$PWD:/opt/benchmark" -w /opt/benchmark darkling/benchmark-php:"$version" \
-	sh -c " 
-		composer install && \
-		composer update && \
-		php init.php b:r $result $outer $inner $format $chatty -d ./"
-
+docker run --rm -it -v "$PWD:/opt/output" darkling/benchmark-php:"$version" \
+		sh -c "
+			php init.php b:r $result $outer $inner $format $chatty -d /opt/output"

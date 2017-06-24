@@ -6,6 +6,9 @@ export LC_ALL=C
 # ------------------
 # Init variables
 # ------------------
+versionPHP="7.1"
+versionJAVA="8"
+versionNodeJS="7.7"
 formatOptions=("native" "json" "xml" "protobuf" "msgpack" "avro")
 format=
 languageOptions=("php" "java" "nodejs")
@@ -76,16 +79,29 @@ function setChatty () {
 	chatty="-c"
 }
 
+
 # ------------------
-# Print
+# Print error messages
 # ------------------
 function error () {
 	printf "\n\tError: $1\n\n";
 	exit 1
 }
 
+
+# ------------------
+# Print help
+# ------------------
 function printHelp () {
-	echo "TODO"
+	printf "\nScript to run benchmarks via Docker."
+	printf "\nResult is stored into directory named output-{datetime}. Bar and Bar graphs are plotted as well.\n"
+	printf "\n\nOptions:\n"
+	printf "\t-h, --help:\t\t Print this very help.\n"
+	printf "\t-o, --outer <n>:\t Number of outer repetitions.\n"
+	printf "\t-i, --inner <n>:\t Number of inner repetitions.\n"
+	printf "\t-f, --format <s>:\t Run benchmark for specific format only.\n"
+	printf "\t-l, --language <s>:\t Build image for specific benchmark only (php, java, nodejs).\n"
+	printf "\t-c, --chatty:\t\t Enable verbose (chatty) mode.\n\n"
 	exit 0
 }
 
@@ -99,6 +115,7 @@ function createOutDir () {
 	outDir="${PWD}/${outDir}/"
 }
 
+
 # ------------------
 # Run benchmarks
 # ------------------
@@ -106,9 +123,9 @@ function runBenchmarks () {
 	executed=false
 
 	# php
-	if [[ ("$language" == "php" || "$language" == "") && "$(docker images -q darkling/benchmark-php:7.1 2> /dev/null)" != "" ]]
+	if [[ ("$language" == "php" || "$language" == "") && "$(docker images -q darkling/benchmark-php:${versionPHP} 2> /dev/null)" != "" ]]
 	then
-		docker run --rm -it -v "$outDir:/opt/output" darkling/benchmark-php:7.1 \
+		docker run --rm -it -v "$outDir:/opt/output" darkling/benchmark-php:"$versionPHP" \
 		sh -c " 
 			php init.php b:r -r csv $outer $inner $format $chatty -d /opt/output"
 			
@@ -116,9 +133,9 @@ function runBenchmarks () {
 	fi
 	
 	# nodeJS
-	if [[ ("$language" == "nodejs" || "$language" == "") && "$(docker images -q darkling/benchmark-nodejs:7.7 2> /dev/null)" != "" ]]
+	if [[ ("$language" == "nodejs" || "$language" == "") && "$(docker images -q darkling/benchmark-nodejs:${versionNodeJS} 2> /dev/null)" != "" ]]
 	then
-		docker run --rm -it -v "$outDir:/opt/output" darkling/benchmark-nodejs:7.7 \
+		docker run --rm -it -v "$outDir:/opt/output" darkling/benchmark-nodejs:"$versionNodeJS" \
 		sh -c " 
 			node init.js -r csv $outer $inner $format $chatty -d /opt/output"
 		
@@ -126,9 +143,9 @@ function runBenchmarks () {
 	fi
 	
 	# java
-	if [[ ("$language" == "java" || "$language" == "") && "$(docker images -q darkling/benchmark-java:8 2> /dev/null)" != "" ]]
+	if [[ ("$language" == "java" || "$language" == "") && "$(docker images -q darkling/benchmark-java:${versionJAVA} 2> /dev/null)" != "" ]]
 	then
-		docker run --rm -it -v "$outDir:/opt/output" darkling/benchmark-java:8 \
+		docker run --rm -it -v "$outDir:/opt/output" darkling/benchmark-java:"$versionJAVA" \
 		sh -c " 
 			java -jar target/benchmark-java-1.0-jar-with-dependencies.jar -r csv $outer $inner $format $chatty -d /opt/output"
 		
@@ -244,7 +261,6 @@ function plotBar () {
 	# open image in the user's preferred app
 	xdg-open $graphImage
 }
-
 
 
 # ---------------------------------------------------
@@ -437,6 +453,7 @@ function plotBox () {
 	done
 }
 
+
 # ------------------
 # Delete temp files
 # ------------------
@@ -475,6 +492,9 @@ function init () {
 # ------------------
 while [ "$1" != "" ]; do
 	case $1 in
+		-h | --help )
+			printHelp
+			;;
 		-o | --outer )
 			shift
 			setOuter $1
@@ -494,9 +514,6 @@ while [ "$1" != "" ]; do
 		-l | --language )
 			shift
 			setLanguage $1
-			;;
-		-h | --help )
-			printHelp
 			;;
 		* )
 			error "Unknown option $1"

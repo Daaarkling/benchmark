@@ -30,16 +30,8 @@ RUN mkdir -p /tmp/protobuf \
 # Set memory_limit = -1
 ADD php.ini /usr/local/etc/php
 
+COPY ./ /opt/benchmark/benchmark-php
 
-WORKDIR /opt
-
-
-# COPY or ADD can't be used with ../ -> Forbidden path outside the build context
-# therefore git is used
-RUN git clone https://github.com/Daaarkling/benchmark.git
-
-
-WORKDIR	benchmark/benchmark-php
-
+WORKDIR	/opt/benchmark/benchmark-php
 
 RUN composer install

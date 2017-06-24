@@ -1,18 +1,34 @@
 #!/usr/bin/env bash
 
-#vars
+# ------------------
+# Init vars
+# ------------------
 languageOptions=("php" "java" "nodejs")
 language=
+versionPHP="7.1"
+versionJAVA="8"
+versionNodeJS="7.7"
 
 
 # ------------------
 # Print error messages
 # ------------------
 function error () {
-	echo ""
-	echo "	Error: $1"
-	echo ""
+	printf "\n\tError: $1\n\n"
 	exit 1
+}
+
+
+# ------------------
+# Print help
+# ------------------
+function printHelp () {
+	printf "\nScript to build docker images for benchmarks.\n"
+	printf "If you wish to build images with different language version, just create Dockerfile inside benchmark-{LANGUAGE}/docker/v{VERSION}/Dockerfile and then change version variables in this file, section #Init vars.\n"
+	printf "\n\nOptions:\n"
+	printf "\t-h, --help:\t\t Print this very help.\n"
+	printf "\t-l, --language <s>:\t Build image for specific benchmark only (php, java, nodejs).\n\n"
+	exit 0
 }
 
 
@@ -46,24 +62,22 @@ function run () {
     # php
 	if [[ "$language" == "php" || "$language" == "" ]]
 	then
-		docker build -t darkling/benchmark-php:7.1 $PWD/benchmark-php/docker/v7.1
+		docker build -t darkling/benchmark-php:"$versionPHP" -f $PWD/benchmark-php/docker/v"$versionPHP"/Dockerfile $PWD/benchmark-php
 	fi
 
 	# java
 	if [[ "$language" == "java" || "$language" == "" ]]
 	then
-		docker build -t darkling/benchmark-java:8 $PWD/benchmark-java/docker/v8
+		docker build -t darkling/benchmark-java:"$versionJAVA" -f $PWD/benchmark-java/docker/v"$versionJAVA"/Dockerfile $PWD/benchmark-java
 	fi
 
 	# nodejs
 	if [[ "$language" == "nodejs" || "$language" == "" ]]
 	then
-		docker build -t darkling/benchmark-nodejs:7.7 $PWD/benchmark-nodejs/docker/v7.7
+		docker build -t darkling/benchmark-nodejs:"$versionNodeJS" -f $PWD/benchmark-nodejs/docker/v"$versionNodeJS"/Dockerfile $PWD/benchmark-nodejs
 	fi
 
-    echo ""
-    echo "Docker images were successfully built."
-    echo ""
+    printf "\n\tDocker images were successfully built.\n\n"
 }
 
 
@@ -72,6 +86,10 @@ function run () {
 # ------------------
 while [ "$1" != "" ]; do
 	case $1 in
+		-h | --help )
+			shift
+			printHelp
+			;;
 		-l | --language )
 			shift
 			setLanguage $1
