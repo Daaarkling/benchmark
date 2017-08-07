@@ -1,5 +1,5 @@
 # Benchmark of (de)serialization formats in PHP, JAVA and NodeJS
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam viverra mollis ipsum, et facilisis lacus varius quis. Donec sodales tellus sit amet ipsum maximus fermentum. Integer auctor id dui aliquet sagittis. Nunc ultrices dolor tellus.
+Comparison of data (de)serialization formats in PHP, JAVA, NODEJS
 
 Requirements
 ----------
@@ -50,7 +50,3 @@ After the benchmark is done. Output directory with name of current date is creat
 All these files are created for each language. These files are then combined into single CSV files from which image files are created. Into these images Bar and Box graph are plotted. 
 
 Times of serialization and deserialization are in milliseconds (ms) units and sizes of serialized data are in kilobytes (kB).
-
-Results
-----------
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam viverra mollis ipsum, et facilisis lacus varius quis. Donec sodales tellus sit amet ipsum maximus fermentum. Integer auctor id dui aliquet sagittis. Nunc ultrices dolor tellus.
